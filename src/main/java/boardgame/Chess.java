@@ -25,6 +25,7 @@ public class Chess<T extends ChessState> extends BoardGame
     @Override
     protected BoardGameState getStartingState()
     {
+        return ChessBoardUtils.getStateFromFen(STARTING_FEN);
     }
 
     public Chess()

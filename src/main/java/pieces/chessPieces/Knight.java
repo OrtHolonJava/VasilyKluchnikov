@@ -16,8 +16,15 @@ public class Knight extends ChessPiece
         {
             add(new ChessDirectionVector(false,2, 1));
             add(new ChessDirectionVector(false,2, -1));
-            add(new ChessDirectionVector(false,1, -1));
-            add(new ChessDirectionVector(false,-1, -1));
+
+            add(new ChessDirectionVector(false,-2, 1));
+            add(new ChessDirectionVector(false,-2, -1));
+
+            add(new ChessDirectionVector(false,1, 2));
+            add(new ChessDirectionVector(false,-1, 2));
+
+            add(new ChessDirectionVector(false,1, -2));
+            add(new ChessDirectionVector(false,-1, -2));
         }
     };
 

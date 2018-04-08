@@ -30,10 +30,7 @@ public class ChessBot implements BoardGameBot
                 {
                     double score = getPieceValue(piece);
                     // TODO: 26.03.2018 Add bonus for mobility (amount of moves), but not too much. Add bonus for being in the middle, but not for king.
-                    /*
-                    int movesAmount = ((ChessState)state).getPossiblePositionsForPiece(new BoardPosition(i, j)).size();
-                    score += movesAmount * 0.1;
-                    */
+
                     if(piece.getPlayer() == Player.WHITE)
                     {
                         whiteScore += score;

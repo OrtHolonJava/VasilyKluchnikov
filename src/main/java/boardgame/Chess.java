@@ -3,7 +3,7 @@ package boardgame;
 import bots.BoardGameBot;
 import bots.ChessBot;
 import enums.Player;
-import exceptions.stateExceptions.KingNotFoundException;
+import exceptions.boardExceptions.KingNotFoundException;
 import gameStates.BoardGameState;
 import gameStates.ChessState;
 import pieces.chessPieces.ChessPiece;
@@ -88,7 +88,7 @@ public class Chess<T extends ChessState> extends BoardGame
     }
 
     @Override
-    public void playBotGame(BoardGameBot bot, Player player)
+    public void playBotGame(BoardGameBot bot, int searchDepth, Player player)
     {
         GameResult gameResult = getGameResult();
         ChessBot chessBot = new ChessBot();
@@ -102,7 +102,7 @@ public class Chess<T extends ChessState> extends BoardGame
             }
             else
             {
-                currentState = bot.findBestNextState(currentState, 5);
+                currentState = bot.findBestNextState(currentState, searchDepth);
             }
 
             turnCount++;

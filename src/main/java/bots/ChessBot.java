@@ -1,8 +1,7 @@
 package bots;
 
-import boardgame.BoardPosition;
 import enums.Player;
-import exceptions.stateExceptions.KingNotFoundException;
+import exceptions.boardExceptions.KingNotFoundException;
 import gameStates.BoardGameState;
 import gameStates.ChessState;
 import pieces.Piece;

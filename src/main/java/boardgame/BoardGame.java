@@ -28,7 +28,7 @@ public abstract class BoardGame<T extends BoardGameState>
 
     public abstract void playGame();
 
-    public abstract void playBotGame(BoardGameBot bot, Player player);
+    public abstract void playBotGame(BoardGameBot bot, int searchDepth, Player player);
 
     protected abstract T getNewStateFromPlayer();
 }

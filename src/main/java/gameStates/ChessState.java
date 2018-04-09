@@ -3,7 +3,7 @@ package gameStates;
 import boardgame.BoardPosition;
 import directionVectors.ChessDirectionVector;
 import enums.Player;
-import exceptions.stateExceptions.KingNotFoundException;
+import exceptions.boardExceptions.KingNotFoundException;
 import pieces.chessPieces.ChessPiece;
 import pieces.chessPieces.King;
 import pieces.chessPieces.Pawn;

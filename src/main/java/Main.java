@@ -11,6 +11,6 @@ public class Main
     public static void main(String[] args)
     {
         Chess<ChessState> chess = new Chess<ChessState>();
-        chess.playBotGame(new ChessBot(), Player.WHITE);
+        chess.playBotGame(new ChessBot(), 4, Player.WHITE);
     }
 }

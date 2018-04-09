@@ -1,7 +1,6 @@
 package directionVectors;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by divided on 19.03.2018.

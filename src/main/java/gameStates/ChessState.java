@@ -3,6 +3,8 @@ package gameStates;
 import boardgame.BoardPosition;
 import directionVectors.ChessDirectionVector;
 import enums.Player;
+import exceptions.BoardGameException;
+import exceptions.boardExceptions.InvalidPositionException;
 import exceptions.boardExceptions.KingNotFoundException;
 import pieces.chessPieces.ChessPiece;
 import pieces.chessPieces.King;
@@ -29,7 +31,7 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
     }
 
     @Override
-    public List<BoardGameState<T>> getAllPossibleStates()
+    public List<BoardGameState<T>> getAllPossibleStates() throws BoardGameException
     {
         ArrayList<BoardGameState<T>> possibleStates = new ArrayList<BoardGameState<T>>();
         
@@ -64,13 +66,13 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
         return possibleStates;
     }
 
-    public List<BoardPosition> getPossiblePositionsForPiece(BoardPosition piecePosition)
+    public List<BoardPosition> getPossiblePositionsForPiece(BoardPosition piecePosition) throws InvalidPositionException
     {
         int x = piecePosition.getX(), y = piecePosition.getY();
 
         if(!isPositionOnBoard(piecePosition) || board[x][y] == null)
         {
-            throw new IllegalArgumentException("Invalid BoardPosition"); // TODO: 24.03.2018 Change this exception?
+            throw new InvalidPositionException("Invalid BoardPosition");
         }
 
         T piece = board[x][y];
@@ -107,13 +109,13 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
         return possiblePositions;
     }
 
-    private List<BoardPosition> getPossiblePositionsForPawn(BoardPosition pawnPosition)
+    private List<BoardPosition> getPossiblePositionsForPawn(BoardPosition pawnPosition) throws InvalidPositionException
     {
         int x = pawnPosition.getX(), y = pawnPosition.getY();
 
         if(!isPositionOnBoard(pawnPosition) || board[x][y] == null || !(board[x][y] instanceof Pawn))
         {
-            throw new IllegalArgumentException("Invalid BoardPosition"); // TODO: 24.03.2018 Change this exception?
+            throw new InvalidPositionException("Invalid position for the pawn");
         }
 
         Pawn pawn = (Pawn)board[x][y];
@@ -166,7 +168,7 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
         return positionChange;
     }
 
-    private boolean isPositionUnderAttack(BoardPosition position, Player playerUnderAttack)
+    private boolean isPositionUnderAttack(BoardPosition position, Player playerUnderAttack) throws InvalidPositionException
     {
         if(!(isPositionOnBoard(position)))
         {
@@ -238,7 +240,7 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
                 (board[x][y] == null || board[x][y].getPlayer() != movingPlayer);
     }
     
-    public boolean kingIsUnderCheck(Player kingsPlayer) throws KingNotFoundException
+    public boolean kingIsUnderCheck(Player kingsPlayer) throws KingNotFoundException, InvalidPositionException
     {
         for(int i = 0; i < board.length; i++)
         {
@@ -255,13 +257,13 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
         throw new KingNotFoundException("King not found on board");
     }
 
-    private boolean hasPawnMoved(BoardPosition pawnPosition)
+    private boolean hasPawnMoved(BoardPosition pawnPosition) throws InvalidPositionException
     {
         int x = pawnPosition.getX(), y = pawnPosition.getY();
 
         if(!isPositionOnBoard(pawnPosition) || board[x][y] == null || !(board[x][y] instanceof Pawn))
         {
-            throw new IllegalArgumentException("Invalid BoardPosition"); // TODO: 27.03.2018 Change this exception?
+            throw new InvalidPositionException("Invalid board position for the pawn");
         }
 
         if(board[x][y].getPlayer() == Player.WHITE)

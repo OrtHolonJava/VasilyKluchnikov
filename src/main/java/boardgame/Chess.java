@@ -1,9 +1,8 @@
 package boardgame;
 
 import bots.BoardGameBot;
-import bots.ChessBot;
 import enums.Player;
-import exceptions.boardExceptions.KingNotFoundException;
+import exceptions.BoardGameException;
 import gameStates.BoardGameState;
 import gameStates.ChessState;
 import pieces.chessPieces.ChessPiece;
@@ -30,32 +29,24 @@ public class Chess<T extends ChessState> extends BoardGame
 
     public Chess()
     {
-        currentState = getStartingState();
+        super();
         previousStates = new ArrayList<ChessState>();
     }
 
     @Override
-    protected GameResult getGameResult()
+    protected GameResult getGameResult() throws BoardGameException
     {
         List<T> possibleStates = currentState.getAllPossibleStates();
         if (possibleStates.isEmpty())
         {
-            try
+            if(((T)currentState).kingIsUnderCheck(currentState.getPlayerToMove()))
             {
-                if(((T)currentState).kingIsUnderCheck(currentState.getPlayerToMove()))
-                {
-                    Player winner = (currentState.getPlayerToMove() == Player.WHITE) ? Player.BLACK : Player.WHITE;
-                    return new GameResult(true, winner);
-                }
-                else
-                {
-                    return new GameResult(true, null);
-                }
+                Player winner = (currentState.getPlayerToMove() == Player.WHITE) ? Player.BLACK : Player.WHITE;
+                return new GameResult(true, winner);
             }
-            catch (KingNotFoundException e)
+            else
             {
-                e.printStackTrace();
-                return null;
+                return new GameResult(true, null);
             }
         }
         else
@@ -65,14 +56,22 @@ public class Chess<T extends ChessState> extends BoardGame
     }
 
     @Override
-    public void playGame()
+    public void playGame() throws BoardGameException
     {
         GameResult gameResult = getGameResult();
         while(!(gameResult.isGameFinished()))
         {
             ChessBoardUtils.displayBoard((ChessPiece[][]) currentState.getBoard());
             previousStates.add(currentState);
-            currentState = getNewStateFromPlayer();
+            try
+            {
+                currentState = getNewStateFromPlayer();
+            }
+            catch (BoardGameException e)
+            {
+                System.out.println("Error getting new state from player!");
+                e.printStackTrace();
+            }
             turnCount++;
             gameResult = getGameResult();
         }
@@ -88,10 +87,9 @@ public class Chess<T extends ChessState> extends BoardGame
     }
 
     @Override
-    public void playBotGame(BoardGameBot bot, int searchDepth, Player player)
+    public void playBotGame(BoardGameBot bot, int searchDepth, Player player) throws BoardGameException
     {
         GameResult gameResult = getGameResult();
-        ChessBot chessBot = new ChessBot();
         while(!(gameResult.isGameFinished()))
         {
             ChessBoardUtils.displayBoard((ChessPiece[][]) currentState.getBoard());
@@ -121,25 +119,19 @@ public class Chess<T extends ChessState> extends BoardGame
 
 
     @Override
-    protected T getNewStateFromPlayer()
+    protected T getNewStateFromPlayer() throws BoardGameException
     {
         System.out.println("Enter position of piece to move: ");
         BoardPosition piecePosition = getPositionFromPlayer();
         List<BoardPosition> possiblePositions = ((T)currentState).getPossiblePositionsForPiece(piecePosition);
 
-        for(BoardPosition possiblePosition : possiblePositions)
+        for(int i = 0; i < possiblePositions.size(); i++)
         {
+            BoardPosition possiblePosition = possiblePositions.get(i);
             ChessState newState = ((T)currentState).getStateAfterMove(piecePosition, possiblePosition);
-            try
+            if(newState.kingIsUnderCheck(((T)currentState).getPlayerToMove()))
             {
-                if(newState.kingIsUnderCheck(((T)currentState).getPlayerToMove()))
-                {
-                    possiblePositions.remove(possiblePosition);
-                }
-            }
-            catch (KingNotFoundException e)
-            {
-                e.printStackTrace();
+                possiblePositions.remove(possiblePosition);
             }
         }
 
@@ -157,6 +149,7 @@ public class Chess<T extends ChessState> extends BoardGame
     }
 
 
+    // Console input will be replaced with a gui
     static Scanner scanner = new Scanner(System.in);
     private static BoardPosition getPositionFromPlayer()
     {

@@ -1,7 +1,5 @@
 package exceptions.stateExceptions;
 
-import exceptions.stateExceptions.IllegalStateException;
-
 /**
  * Created by divided on 21.03.2018.
  */

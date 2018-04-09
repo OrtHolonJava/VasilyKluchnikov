@@ -1,12 +1,9 @@
 package pieces.chessPieces;
 
 import directionVectors.ChessDirectionVector;
-import directionVectors.DirectionVector;
 import enums.Player;
-import pieces.Piece;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**

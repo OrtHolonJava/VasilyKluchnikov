@@ -1,7 +1,9 @@
 package bots;
 
 import enums.Player;
-import exceptions.boardExceptions.KingNotFoundException;
+import exceptions.BoardGameException;
+import exceptions.botExceptions.BotEvaluateException;
+import exceptions.botExceptions.BotMoveSearchException;
 import gameStates.BoardGameState;
 import gameStates.ChessState;
 import pieces.Piece;
@@ -15,7 +17,7 @@ import java.util.List;
 public class ChessBot implements BoardGameBot
 {
     @Override
-    public double evaluate(BoardGameState<Piece> state)
+    public double evaluate(BoardGameState<Piece> state) throws BotEvaluateException
     {
         double whiteScore = 0, blackScore = 0;
         Piece[][] board = state.getBoard();
@@ -28,8 +30,6 @@ public class ChessBot implements BoardGameBot
                 if (piece != null)
                 {
                     double score = getPieceValue(piece);
-                    // TODO: 26.03.2018 Add bonus for mobility (amount of moves), but not too much. Add bonus for being in the middle, but not for king.
-
                     if(piece.getPlayer() == Player.WHITE)
                     {
                         whiteScore += score;
@@ -45,7 +45,7 @@ public class ChessBot implements BoardGameBot
         return (whiteScore - blackScore);
     }
 
-    private double getPieceValue(Piece piece)
+    private double getPieceValue(Piece piece) throws BotEvaluateException
     {
         if (piece instanceof Pawn)
         {
@@ -71,35 +71,37 @@ public class ChessBot implements BoardGameBot
         {
             return 500;
         }
-        return 0; // TODO: 22.03.2018  Can't happen, need to throw error?
+        throw new BotEvaluateException("Trying to evaluate an invalid piece");
     }
 
     @Override
-    public BoardGameState findBestNextState(BoardGameState state, int depth)
+    public BoardGameState findBestNextState(BoardGameState state, int depth) throws BotMoveSearchException
     {
-        MinimaxResult minimaxResult = minimax(state, depth, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+        MinimaxResult minimaxResult;
+        try
+        {
+            minimaxResult = minimax(state, depth, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+        }
+        catch (BoardGameException exception)
+        {
+            throw new BotMoveSearchException("Failed to evaluate the position");
+        }
         return minimaxResult.getBestState();
     }
 
-    private MinimaxResult minimax(BoardGameState state, int depth, double alpha, double beta)
+    private MinimaxResult minimax(BoardGameState state, int depth, double alpha, double beta) throws BoardGameException
     {
         List<BoardGameState> allPossibleStates = (List<BoardGameState>)state.getAllPossibleStates();
 
         if(allPossibleStates.isEmpty())
         {
             double value = 0;
-            try
+            if(((ChessState)state).kingIsUnderCheck(state.getPlayerToMove()))
             {
-                if(((ChessState)state).kingIsUnderCheck(state.getPlayerToMove()))
-                {
-                    value = (state.getPlayerToMove() == Player.WHITE)
-                            ? 500 : -500;
-                }
+                value = (state.getPlayerToMove() == Player.WHITE)
+                        ? 500 : -500;
             }
-            catch (KingNotFoundException e)
-            {
-                e.printStackTrace();
-            }
+
             return new MinimaxResult(value, null);
         }
         if(depth == 0)
@@ -109,7 +111,7 @@ public class ChessBot implements BoardGameBot
             {
                 evaluateValue *= -1;
             }
-            return new MinimaxResult(evaluateValue, null); // was MinimaxResult(evaluateValue, state);
+            return new MinimaxResult(evaluateValue, null);
         }
 
 

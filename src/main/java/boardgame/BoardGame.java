@@ -2,6 +2,7 @@ package boardgame;
 
 import bots.BoardGameBot;
 import enums.Player;
+import exceptions.BoardGameException;
 import gameStates.BoardGameState;
 
 import java.util.Collection;
@@ -24,11 +25,11 @@ public abstract class BoardGame<T extends BoardGameState>
 
     protected abstract T getStartingState();
 
-    protected abstract GameResult getGameResult();
+    protected abstract GameResult getGameResult() throws BoardGameException;
 
-    public abstract void playGame();
+    public abstract void playGame() throws BoardGameException;
 
-    public abstract void playBotGame(BoardGameBot bot, int searchDepth, Player player);
+    public abstract void playBotGame(BoardGameBot bot, int searchDepth, Player player) throws BoardGameException;
 
-    protected abstract T getNewStateFromPlayer();
+    protected abstract T getNewStateFromPlayer() throws BoardGameException;
 }

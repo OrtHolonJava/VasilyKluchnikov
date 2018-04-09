@@ -5,8 +5,6 @@ import enums.Player;
 import gameStates.ChessState;
 import pieces.chessPieces.*;
 
-import java.util.List;
-
 /**
  * Created by divided on 22.03.2018.
  */

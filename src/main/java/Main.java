@@ -1,6 +1,7 @@
 import boardgame.Chess;
 import bots.ChessBot;
 import enums.Player;
+import exceptions.BoardGameException;
 import gameStates.ChessState;
 
 /**
@@ -11,6 +12,13 @@ public class Main
     public static void main(String[] args)
     {
         Chess<ChessState> chess = new Chess<ChessState>();
-        chess.playBotGame(new ChessBot(), 4, Player.WHITE);
+        try
+        {
+            chess.playBotGame(new ChessBot(), 4, Player.WHITE);
+        }
+        catch (BoardGameException e)
+        {
+            e.printStackTrace();
+        }
     }
 }

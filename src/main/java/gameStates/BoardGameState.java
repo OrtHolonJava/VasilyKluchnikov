@@ -1,9 +1,8 @@
 package gameStates;
 
-import boardgame.Chess;
 import enums.Player;
+import exceptions.BoardGameException;
 import pieces.Piece;
-import pieces.chessPieces.ChessPiece;
 
 import java.util.List;
 
@@ -24,18 +23,15 @@ public abstract class BoardGameState<T extends Piece>
     public BoardGameState(BoardGameState<T> state)
     {
         this.playerToMove = state.playerToMove;
-        board = (T[][]) new ChessPiece[Chess.boardSize][Chess.boardSize];
+
+        board = state.board.clone();
         for(int i = 0; i < board.length; i++)
         {
-            for(int j = 0; j < board[0].length; j++)
-            {
-                board[i][j] = state.board[i][j]; // TODO: 23.03.2018 The piece is not actually cloned. HasMoved therefore is unreliable. 
-            }
+            board[i] = state.board[i].clone(); // Note: The pieces aren't deep cloned
         }
-
     }
 
-    public abstract List<BoardGameState<T>> getAllPossibleStates();
+    public abstract List<BoardGameState<T>> getAllPossibleStates() throws BoardGameException;
 
     public T[][] getBoard()
     {

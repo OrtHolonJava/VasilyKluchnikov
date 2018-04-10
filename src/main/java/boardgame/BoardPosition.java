@@ -24,10 +24,22 @@ public class BoardPosition
         addToPosition(position.getX(), position.getY());
     }
 
+    /*
+        Adds to the x and y, respectively
+     */
     public void addToPosition(int x, int y)
     {
         this.x += x;
         this.y += y;
+    }
+
+    /*
+        Multiplies both x and y by n
+     */
+    public void multiplyPosition(int n)
+    {
+        x *= n;
+        y *= n;
     }
 
     @Override
@@ -42,11 +54,6 @@ public class BoardPosition
         return x == position.x && y == position.y;
     }
 
-    public void multiplyPosition(int n)
-    {
-        x *= n;
-        y *= n;
-    }
 
     public int getX()
     {

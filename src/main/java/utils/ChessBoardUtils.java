@@ -10,6 +10,11 @@ import pieces.chessPieces.*;
  */
 public class ChessBoardUtils
 {
+    /*
+        Converts FEN code (the board part of it) to a chess state
+        FEN code explanation - https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
+     */
+
     public static ChessState<ChessPiece> getStateFromFen(String fenString)
     {
         ChessPiece[][] board = new ChessPiece[Chess.boardSize][Chess.boardSize];
@@ -27,7 +32,15 @@ public class ChessBoardUtils
             }
             else
             {
-                Player player = Character.isUpperCase(ch) ? Player.WHITE : Player.BLACK;
+                Player player;
+                if(Character.isUpperCase(ch))
+                {
+                    player = Player.WHITE;
+                }
+                else
+                {
+                    player = Player.BLACK;
+                }
                 ch = Character.toUpperCase(ch);
                 switch(ch)
                 {
@@ -59,6 +72,9 @@ public class ChessBoardUtils
         return new ChessState<ChessPiece>(board, Player.WHITE);
     }
 
+    /*
+        Textually outputs the current chess board
+     */
     public static void displayBoard(ChessPiece[][] board)
     {
         System.out.println();
@@ -68,18 +84,21 @@ public class ChessBoardUtils
         }
         System.out.println();
 
-        for(int i = 0; i < board.length; i++)
+        for(int x = 0; x < board.length; x++)
         {
-            for(int j = 0; j < board[0].length; j++)
+            for(int y = 0; y < board[0].length; y++)
             {
-                char charToPrint = getCharRepresentationFromPiece(board[i][j]);
+                char charToPrint = getCharRepresentationFromPiece(board[x][y]);
                 System.out.print(" " + charToPrint + " ");
             }
-            System.out.println("  " + i);
+            System.out.println("  " + x);
         }
         System.out.println();
     }
 
+    /*
+        Gets char representation for the chess piece
+     */
     private static char getCharRepresentationFromPiece(ChessPiece piece)
     {
         char ch = ' ';

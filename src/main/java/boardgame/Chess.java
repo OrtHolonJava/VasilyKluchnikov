@@ -6,6 +6,7 @@ import exceptions.BoardGameException;
 import gameStates.BoardGameState;
 import gameStates.ChessState;
 import pieces.chessPieces.ChessPiece;
+import ui.InputGetter;
 import utils.ChessBoardUtils;
 
 import java.util.ArrayList;
@@ -27,6 +28,10 @@ public class Chess<T extends ChessState> extends BoardGame
         previousStates = new ArrayList<ChessState>();
     }
 
+    /*
+            Starts a player vs. player game and manages it
+            Manages turn order, input and stops the game when its finished
+    */
     @Override
     public void playGame() throws BoardGameException
     {
@@ -58,6 +63,10 @@ public class Chess<T extends ChessState> extends BoardGame
         }
     }
 
+    /*
+        Starts a player vs. bot game and manages it
+        Manages turn order, input and stops the game when its finished
+     */
     @Override
     public void playBotGame(BoardGameBot bot, int searchDepth, Player player) throws BoardGameException
     {
@@ -95,6 +104,10 @@ public class Chess<T extends ChessState> extends BoardGame
         return ChessBoardUtils.getStateFromFen(STARTING_FEN);
     }
 
+    /*
+        Gets the game result for the ongoing game
+        Game result includes an indication if the game is finished, and the winning player (null if one doesn't exist)
+     */
     @Override
     protected GameResult getGameResult() throws BoardGameException
     {
@@ -103,7 +116,15 @@ public class Chess<T extends ChessState> extends BoardGame
         {
             if(((T)currentState).kingIsUnderCheck(currentState.getPlayerToMove()))
             {
-                Player winner = (currentState.getPlayerToMove() == Player.WHITE) ? Player.BLACK : Player.WHITE;
+                Player winner;
+                if(currentState.getPlayerToMove() == Player.WHITE)
+                {
+                    winner = Player.BLACK;
+                }
+                else
+                {
+                    winner = Player.WHITE;
+                }
                 return new GameResult(true, winner);
             }
             else
@@ -118,45 +139,13 @@ public class Chess<T extends ChessState> extends BoardGame
     }
 
 
+    /*
+        Gets new state from the player
+     */
     @Override
     protected T getNewStateFromPlayer() throws BoardGameException
     {
-        System.out.println("Enter position of piece to move: ");
-        BoardPosition piecePosition = getPositionFromPlayer();
-        List<BoardPosition> possiblePositions = ((T)currentState).getPossiblePositionsForPiece(piecePosition);
-
-        for(int i = 0; i < possiblePositions.size(); i++)
-        {
-            BoardPosition possiblePosition = possiblePositions.get(i);
-            ChessState newState = ((T)currentState).getStateAfterMove(piecePosition, possiblePosition);
-            if(newState.kingIsUnderCheck(((T)currentState).getPlayerToMove()))
-            {
-                possiblePositions.remove(possiblePosition);
-            }
-        }
-
-
-        System.out.println("Possible options are: ");
-        for(int i = 1; i <= possiblePositions.size(); i++)
-        {
-            System.out.println(i + ".  " +
-                    possiblePositions.get(i - 1).getX() + "," + possiblePositions.get(i - 1).getY());
-        }
-        System.out.println("Enter the option: ");
-        int choice = scanner.nextInt();
-
-        return (T) ((T) currentState).getStateAfterMove(piecePosition, possiblePositions.get(choice - 1));
-    }
-
-
-    // Console input will be replaced with a gui
-    static Scanner scanner = new Scanner(System.in);
-    private static BoardPosition getPositionFromPlayer()
-    {
-        System.out.print("x: ");
-        int x = scanner.nextInt();
-        System.out.print("y: ");
-        int y = scanner.nextInt();
-        return new BoardPosition(x, y);
+        InputGetter inputGetter = new InputGetter();
+        return (T)inputGetter.getChessStateInputFromUser((T)currentState);
     }
 }

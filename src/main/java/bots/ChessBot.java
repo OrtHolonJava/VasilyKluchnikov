@@ -45,6 +45,23 @@ public class ChessBot implements BoardGameBot
         return (whiteScore - blackScore);
     }
 
+
+
+    @Override
+    public BoardGameState findBestNextState(BoardGameState state, int depth) throws BotMoveSearchException
+    {
+        MinimaxResult minimaxResult;
+        try
+        {
+            minimaxResult = minimax(state, depth, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+        }
+        catch (BoardGameException exception)
+        {
+            throw new BotMoveSearchException("Failed to evaluate the position");
+        }
+        return minimaxResult.getBestState();
+    }
+
     private double getPieceValue(Piece piece) throws BotEvaluateException
     {
         if (piece instanceof Pawn)
@@ -72,21 +89,6 @@ public class ChessBot implements BoardGameBot
             return 500;
         }
         throw new BotEvaluateException("Trying to evaluate an invalid piece");
-    }
-
-    @Override
-    public BoardGameState findBestNextState(BoardGameState state, int depth) throws BotMoveSearchException
-    {
-        MinimaxResult minimaxResult;
-        try
-        {
-            minimaxResult = minimax(state, depth, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
-        }
-        catch (BoardGameException exception)
-        {
-            throw new BotMoveSearchException("Failed to evaluate the position");
-        }
-        return minimaxResult.getBestState();
     }
 
     private MinimaxResult minimax(BoardGameState state, int depth, double alpha, double beta) throws BoardGameException

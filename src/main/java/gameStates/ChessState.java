@@ -109,6 +109,42 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
         return possiblePositions;
     }
 
+    public ChessState<T> getStateAfterMove(BoardPosition oldPosition, BoardPosition newPosition)
+    {
+        return getStateAfterMove(oldPosition.getX(), oldPosition.getY(), newPosition.getX(), newPosition.getY());
+    }
+
+    public ChessState<T> getStateAfterMove(int oldX, int oldY, int newX, int newY)
+    {
+        ChessState<T> newState = new ChessState<T>(this);
+        T pieceToMove = newState.board[oldX][oldY];
+        newState.playerToMove = (pieceToMove.getPlayer() == Player.WHITE) ? Player.BLACK : Player.WHITE;
+        newState.board[newX][newY] = pieceToMove;
+        newState.board[oldX][oldY] = null;
+        if(pieceNeedsToBePromoted(newX, pieceToMove))
+        {
+            newState.board[newX][newY] = (T)new Queen(pieceToMove.getPlayer());
+        }
+        return newState;
+    }
+
+    public boolean kingIsUnderCheck(Player kingsPlayer) throws KingNotFoundException, InvalidPositionException
+    {
+        for(int i = 0; i < board.length; i++)
+        {
+            for (int j = 0; j < board[0].length; j++)
+            {
+                T piece = board[i][j];
+                if(piece != null && piece.getPlayer() == kingsPlayer && piece instanceof King)
+                {
+                    return isPositionUnderAttack(new BoardPosition(i, j), kingsPlayer);
+                }
+            }
+        }
+
+        throw new KingNotFoundException("King not found on board");
+    }
+
     private List<BoardPosition> getPossiblePositionsForPawn(BoardPosition pawnPosition) throws InvalidPositionException
     {
         int x = pawnPosition.getX(), y = pawnPosition.getY();
@@ -195,25 +231,6 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
         return false;
     }
 
-    public ChessState<T> getStateAfterMove(BoardPosition oldPosition, BoardPosition newPosition)
-    {
-        return getStateAfterMove(oldPosition.getX(), oldPosition.getY(), newPosition.getX(), newPosition.getY());
-    }
-
-    public ChessState<T> getStateAfterMove(int oldX, int oldY, int newX, int newY)
-    {
-        ChessState<T> newState = new ChessState<T>(this);
-        T pieceToMove = newState.board[oldX][oldY];
-        newState.playerToMove = (pieceToMove.getPlayer() == Player.WHITE) ? Player.BLACK : Player.WHITE;
-        newState.board[newX][newY] = pieceToMove;
-        newState.board[oldX][oldY] = null;
-        if(pieceNeedsToBePromoted(newX, pieceToMove))
-        {
-            newState.board[newX][newY] = (T)new Queen(pieceToMove.getPlayer());
-        }
-        return newState;
-    }
-
     private boolean pieceNeedsToBePromoted(int x, ChessPiece chessPiece)
     {
         return chessPiece instanceof Pawn && (x == 0 || x == board.length - 1);
@@ -238,23 +255,6 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
     {
         return isPositionOnBoard(x,y) &&
                 (board[x][y] == null || board[x][y].getPlayer() != movingPlayer);
-    }
-    
-    public boolean kingIsUnderCheck(Player kingsPlayer) throws KingNotFoundException, InvalidPositionException
-    {
-        for(int i = 0; i < board.length; i++)
-        {
-            for (int j = 0; j < board[0].length; j++)
-            {
-                T piece = board[i][j];
-                if(piece != null && piece.getPlayer() == kingsPlayer && piece instanceof King)
-                {
-                    return isPositionUnderAttack(new BoardPosition(i, j), kingsPlayer);
-                }
-            }
-        }
-
-        throw new KingNotFoundException("King not found on board");
     }
 
     private boolean hasPawnMoved(BoardPosition pawnPosition) throws InvalidPositionException

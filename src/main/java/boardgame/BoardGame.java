@@ -23,13 +23,13 @@ public abstract class BoardGame<T extends BoardGameState>
         turnCount = 0;
     }
 
-    protected abstract T getStartingState();
-
-    protected abstract GameResult getGameResult() throws BoardGameException;
-
     public abstract void playGame() throws BoardGameException;
 
     public abstract void playBotGame(BoardGameBot bot, int searchDepth, Player player) throws BoardGameException;
+
+    protected abstract T getStartingState();
+
+    protected abstract GameResult getGameResult() throws BoardGameException;
 
     protected abstract T getNewStateFromPlayer() throws BoardGameException;
 }

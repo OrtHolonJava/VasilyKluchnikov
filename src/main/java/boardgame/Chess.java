@@ -21,38 +21,10 @@ public class Chess<T extends ChessState> extends BoardGame
 
     private static final String STARTING_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
 
-    @Override
-    protected BoardGameState getStartingState()
-    {
-        return ChessBoardUtils.getStateFromFen(STARTING_FEN);
-    }
-
     public Chess()
     {
         super();
         previousStates = new ArrayList<ChessState>();
-    }
-
-    @Override
-    protected GameResult getGameResult() throws BoardGameException
-    {
-        List<T> possibleStates = currentState.getAllPossibleStates();
-        if (possibleStates.isEmpty())
-        {
-            if(((T)currentState).kingIsUnderCheck(currentState.getPlayerToMove()))
-            {
-                Player winner = (currentState.getPlayerToMove() == Player.WHITE) ? Player.BLACK : Player.WHITE;
-                return new GameResult(true, winner);
-            }
-            else
-            {
-                return new GameResult(true, null);
-            }
-        }
-        else
-        {
-            return new GameResult(false, null);
-        }
     }
 
     @Override
@@ -114,6 +86,34 @@ public class Chess<T extends ChessState> extends BoardGame
         else
         {
             System.out.println("Draw!");
+        }
+    }
+
+    @Override
+    protected BoardGameState getStartingState()
+    {
+        return ChessBoardUtils.getStateFromFen(STARTING_FEN);
+    }
+
+    @Override
+    protected GameResult getGameResult() throws BoardGameException
+    {
+        List<T> possibleStates = currentState.getAllPossibleStates();
+        if (possibleStates.isEmpty())
+        {
+            if(((T)currentState).kingIsUnderCheck(currentState.getPlayerToMove()))
+            {
+                Player winner = (currentState.getPlayerToMove() == Player.WHITE) ? Player.BLACK : Player.WHITE;
+                return new GameResult(true, winner);
+            }
+            else
+            {
+                return new GameResult(true, null);
+            }
+        }
+        else
+        {
+            return new GameResult(false, null);
         }
     }
 

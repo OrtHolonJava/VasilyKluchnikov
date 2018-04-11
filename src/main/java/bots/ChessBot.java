@@ -5,11 +5,11 @@ import exceptions.BoardGameException;
 import exceptions.botExceptions.BotEvaluateException;
 import exceptions.botExceptions.BotMoveSearchException;
 import gameStates.BoardGameState;
-import gameStates.ChessState;
 import pieces.Piece;
 import pieces.chessPieces.*;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by divided on 19.03.2018.
@@ -67,35 +67,37 @@ public class ChessBot extends BoardGameBot
         return minimaxResult.getBestState();
     }
 
+
+    private static final double PAWN_VALUE = 1;
+    private static final double KNIGHT_VALUE = 3.2;
+    private static final double BISHOP_VALUE = 3.3;
+    private static final double ROOK_VALUE = 5;
+    private static final double QUEEN_VALUE = 9;
+    private static final double KING_VALUE = 500;
+
+    private static Map<String, Double> pieceNameToValueMap;
+
+    static
+    {
+        pieceNameToValueMap = new HashMap<String, Double>();
+        pieceNameToValueMap.put(Pawn.class.getSimpleName(), PAWN_VALUE);
+        pieceNameToValueMap.put(Knight.class.getSimpleName(), KNIGHT_VALUE);
+        pieceNameToValueMap.put(Bishop.class.getSimpleName(), BISHOP_VALUE);
+        pieceNameToValueMap.put(Rook.class.getSimpleName(), ROOK_VALUE);
+        pieceNameToValueMap.put(Queen.class.getSimpleName(), QUEEN_VALUE);
+        pieceNameToValueMap.put(King.class.getSimpleName(), KING_VALUE);
+    }
     /*
         Returns a numerical value for a given piece
      */
     private double getPieceValue(Piece piece) throws BotEvaluateException
     {
-        if (piece instanceof Pawn)
+        Double value = pieceNameToValueMap.get(piece.getClass().getSimpleName());
+        if(value == null)
         {
-            return 1;
+            throw new BotEvaluateException("Trying to evaluate an invalid piece");
         }
-        else if (piece instanceof Knight)
-        {
-            return 3.2;
-        }
-        else if (piece instanceof Bishop)
-        {
-            return 3.3;
-        }
-        else if (piece instanceof Rook)
-        {
-            return 5;
-        }
-        else if (piece instanceof Queen)
-        {
-            return 9;
-        }
-        else if (piece instanceof King)
-        {
-            return 500;
-        }
-        throw new BotEvaluateException("Trying to evaluate an invalid piece");
+
+        return value;
     }
 }

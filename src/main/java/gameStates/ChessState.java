@@ -38,11 +38,11 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
     {
         ArrayList<BoardGameState<T>> possibleStates = new ArrayList<BoardGameState<T>>();
         
-        for(int x = 0; x < board.length; x++)
+        for(int x = 0; x < getBoard().length; x++)
         {
-            for(int y = 0; y < board[0].length; y++)
+            for(int y = 0; y < getBoard()[0].length; y++)
             {
-                T piece = board[x][y];
+                T piece = getBoard()[x][y];
                 if (piece != null && piece.getPlayer() == getPlayerToMove())
                 {
                     BoardPosition piecePosition = new BoardPosition(x, y);
@@ -69,12 +69,12 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
     {
         int x = piecePosition.getX(), y = piecePosition.getY();
 
-        if(!isPositionOnBoard(piecePosition) || board[x][y] == null)
+        if(!isPositionOnBoard(piecePosition) || getBoard()[x][y] == null)
         {
             throw new InvalidPositionException("Invalid position for the piece");
         }
 
-        T piece = board[x][y];
+        T piece = getBoard()[x][y];
         if (piece instanceof Pawn)
         {
             return getPossiblePositionsForPawn(piecePosition);
@@ -90,14 +90,14 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
             if(isPositionLegalToMoveOn(newPosition, piece.getPlayer()))
             {
                 possiblePositions.add(newPosition);
-                if(directionVector.isRepeating() && board[newPosition.getX()][newPosition.getY()] == null)
+                if(directionVector.isRepeating() && getBoard()[newPosition.getX()][newPosition.getY()] == null)
                 {
                     newPosition = new BoardPosition(newPosition);
                     newPosition.addToPosition(positionChange);
                     while(isPositionLegalToMoveOn(newPosition, piece.getPlayer()))
                     {
                         possiblePositions.add(newPosition);
-                        if(board[newPosition.getX()][newPosition.getY()] != null)
+                        if(getBoard()[newPosition.getX()][newPosition.getY()] != null)
                         {
                             break; // In case a piece is captured
                         }
@@ -125,7 +125,7 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
     public ChessState<T> getStateAfterMove(int oldX, int oldY, int newX, int newY)
     {
         ChessState<T> newState = new ChessState<T>(this);
-        T pieceToMove = newState.board[oldX][oldY];
+        T pieceToMove = newState.getBoard()[oldX][oldY];
         if(pieceToMove.getPlayer() == Player.WHITE)
         {
             newState.setPlayerToMove(Player.BLACK);
@@ -134,11 +134,11 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
         {
             newState.setPlayerToMove(Player.WHITE);
         }
-        newState.board[newX][newY] = pieceToMove;
-        newState.board[oldX][oldY] = null;
+        newState.getBoard()[newX][newY] = pieceToMove;
+        newState.getBoard()[oldX][oldY] = null;
         if(pieceNeedsToBePromoted(newX, pieceToMove))
         {
-            newState.board[newX][newY] = (T)new Queen(pieceToMove.getPlayer());
+            newState.getBoard()[newX][newY] = (T)new Queen(pieceToMove.getPlayer());
         }
         return newState;
     }
@@ -148,11 +148,11 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
      */
     public boolean kingIsUnderCheck(Player kingsPlayer) throws KingNotFoundException, InvalidPositionException
     {
-        for(int x = 0; x < board.length; x++)
+        for(int x = 0; x < getBoard().length; x++)
         {
-            for (int y = 0; y < board[0].length; y++)
+            for (int y = 0; y < getBoard()[0].length; y++)
             {
-                T piece = board[x][y];
+                T piece = getBoard()[x][y];
                 if(piece != null && piece.getPlayer() == kingsPlayer && piece instanceof King)
                 {
                     return isPositionUnderAttack(new BoardPosition(x, y), kingsPlayer);
@@ -170,26 +170,26 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
     {
         int x = pawnPosition.getX(), y = pawnPosition.getY();
 
-        if(!isPositionOnBoard(pawnPosition) || board[x][y] == null || !(board[x][y] instanceof Pawn))
+        if(!isPositionOnBoard(pawnPosition) || getBoard()[x][y] == null || !(getBoard()[x][y] instanceof Pawn))
         {
             throw new InvalidPositionException("Invalid position for the pawn");
         }
 
-        Pawn pawn = (Pawn)board[x][y];
+        Pawn pawn = (Pawn)getBoard()[x][y];
         List<BoardPosition> possiblePositions = new ArrayList<BoardPosition>();
         for (ChessDirectionVector directionVector : pawn.getDirectionVectors())
         {
             BoardPosition positionChange = getPositionChangeFromDirectionVector(directionVector, pawn.getPlayer());
             BoardPosition newPosition = new BoardPosition(pawnPosition);
             newPosition.addToPosition(positionChange);
-            if(isPositionOnBoard(newPosition) && board[newPosition.getX()][newPosition.getY()] == null)
+            if(isPositionOnBoard(newPosition) && getBoard()[newPosition.getX()][newPosition.getY()] == null)
             {
                 possiblePositions.add(newPosition);
                 if(!hasPawnMoved(pawnPosition))
                 {
                     newPosition = new BoardPosition(newPosition);
                     newPosition.addToPosition(positionChange);
-                    if(board[newPosition.getX()][newPosition.getY()] == null)
+                    if(getBoard()[newPosition.getX()][newPosition.getY()] == null)
                     {
                         possiblePositions.add(newPosition);
                     }
@@ -204,7 +204,7 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
             BoardPosition newPosition = new BoardPosition(pawnPosition);
             newPosition.addToPosition(positionChange);
             if(isPositionLegalToMoveOn(newPosition, pawn.getPlayer()) &&
-                    board[newPosition.getX()][newPosition.getY()] != null)
+                    getBoard()[newPosition.getX()][newPosition.getY()] != null)
             {
                 possiblePositions.add(newPosition);
             }
@@ -239,11 +239,11 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
             throw new IndexOutOfBoundsException("Position is out of bounds");
         }
 
-        for(int x = 0; x < board.length; x++)
+        for(int x = 0; x < getBoard().length; x++)
         {
-            for(int y = 0; y < board[0].length; y++)
+            for(int y = 0; y < getBoard()[0].length; y++)
             {
-                T piece = board[x][y];
+                T piece = getBoard()[x][y];
                 if (piece != null && piece.getPlayer() != playerUnderAttack)
                 {
                     BoardPosition piecePosition = new BoardPosition(x, y);
@@ -264,7 +264,7 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
      */
     private boolean pieceNeedsToBePromoted(int x, ChessPiece chessPiece)
     {
-        return chessPiece instanceof Pawn && (x == 0 || x == board.length - 1);
+        return chessPiece instanceof Pawn && (x == 0 || x == getBoard().length - 1);
     }
 
     /*
@@ -280,7 +280,7 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
      */
     private boolean isPositionOnBoard(int x, int y)
     {
-        return !(x < 0 || y < 0 || x >= board.length || y >= board[0].length);
+        return !(x < 0 || y < 0 || x >= getBoard().length || y >= getBoard()[0].length);
     }
 
     /*
@@ -297,7 +297,7 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
     private boolean isPositionLegalToMoveOn(int x, int y, Player movingPlayer)
     {
         return isPositionOnBoard(x,y) &&
-                (board[x][y] == null || board[x][y].getPlayer() != movingPlayer);
+                (getBoard()[x][y] == null || getBoard()[x][y].getPlayer() != movingPlayer);
     }
 
     /*
@@ -307,14 +307,14 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
     {
         int x = pawnPosition.getX(), y = pawnPosition.getY();
 
-        if(!isPositionOnBoard(pawnPosition) || board[x][y] == null || !(board[x][y] instanceof Pawn))
+        if(!isPositionOnBoard(pawnPosition) || getBoard()[x][y] == null || !(getBoard()[x][y] instanceof Pawn))
         {
             throw new InvalidPositionException("Invalid board position for the pawn");
         }
 
         if(board[x][y].getPlayer() == Player.WHITE)
         {
-            return x != (board.length - 2);
+            return x != (getBoard().length - 2);
         }
         else
         {

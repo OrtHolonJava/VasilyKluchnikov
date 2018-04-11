@@ -4,7 +4,7 @@ import enums.Player;
 import exceptions.BoardGameException;
 import pieces.Piece;
 
-import java.util.List;
+import java.util.Collection;
 
 /**
  * Created by divided on 19.03.2018.
@@ -34,7 +34,7 @@ public abstract class BoardGameState<T extends Piece>
     /*
         Returns all states that are possible after this state
      */
-    public abstract List<BoardGameState<T>> getAllPossibleStates() throws BoardGameException;
+    public abstract Collection<BoardGameState<T>> getAllPossibleStates() throws BoardGameException;
 
     public T[][] getBoard()
     {

@@ -47,4 +47,34 @@ public abstract class BoardGame<T extends BoardGameState>
         Gets new state from the player
      */
     protected abstract T getNewStateFromPlayer() throws BoardGameException;
+
+    public T getCurrentState()
+    {
+        return currentState;
+    }
+
+    public Collection<T> getPreviousStates()
+    {
+        return previousStates;
+    }
+
+    public int getTurnCount()
+    {
+        return turnCount;
+    }
+
+    public void setCurrentState(T currentState)
+    {
+        this.currentState = currentState;
+    }
+
+    public void setPreviousStates(Collection<T> previousStates)
+    {
+        this.previousStates = previousStates;
+    }
+
+    public void setTurnCount(int turnCount)
+    {
+        this.turnCount = turnCount;
+    }
 }

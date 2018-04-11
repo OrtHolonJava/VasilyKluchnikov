@@ -4,6 +4,7 @@ import directionVectors.ChessDirectionVector;
 import enums.Player;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -34,7 +35,7 @@ public class Pawn extends ChessPiece
     };
 
     @Override
-    public List<ChessDirectionVector> getDirectionVectors()
+    public Collection<ChessDirectionVector> getDirectionVectors()
     {
         return chessDirectionVectors;
     }

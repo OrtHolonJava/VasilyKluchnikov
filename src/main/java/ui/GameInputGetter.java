@@ -4,6 +4,7 @@ import boardgame.BoardPosition;
 import exceptions.BoardGameException;
 import gameStates.ChessState;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -19,7 +20,9 @@ public class GameInputGetter
     {
         System.out.println("Enter position of piece to move: ");
         BoardPosition piecePosition = getPositionFromPlayer();
-        List<BoardPosition> possiblePositions = currentState.getPossiblePositionsForPiece(piecePosition);
+        List<BoardPosition> possiblePositions = new ArrayList<BoardPosition>();
+        possiblePositions.addAll(currentState.getPossiblePositionsForPiece(piecePosition));
+
 
         for(int i = 0; i < possiblePositions.size(); i++)
         {

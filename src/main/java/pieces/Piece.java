@@ -3,6 +3,7 @@ package pieces;
 import directionVectors.DirectionVector;
 import enums.Player;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -22,7 +23,7 @@ public abstract class Piece<T extends DirectionVector>
         this.player = piece.player;
     }
 
-    public abstract List<T> getDirectionVectors();
+    public abstract Collection<T> getDirectionVectors();
 
     public Player getPlayer()
     {

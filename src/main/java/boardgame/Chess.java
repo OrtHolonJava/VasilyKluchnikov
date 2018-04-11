@@ -11,7 +11,7 @@ import ui.GameInputGetter;
 import utils.ChessBoardUtils;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
 /**
  * Created by divided on 19.03.2018.
@@ -25,7 +25,7 @@ public class Chess<T extends ChessState> extends BoardGame
     public Chess()
     {
         super();
-        previousStates = new ArrayList<ChessState>();
+        setPreviousStates(new ArrayList<ChessState>());
     }
 
     /*
@@ -38,10 +38,10 @@ public class Chess<T extends ChessState> extends BoardGame
         GameResult gameResult = getGameResult();
         while(!(gameResult.isGameFinished()))
         {
-            ChessBoardUtils.displayBoard((ChessPiece[][]) currentState.getBoard());
-            previousStates.add(currentState);
-            currentState = getNewStateFromPlayer();
-            turnCount++;
+            ChessBoardUtils.displayBoard((ChessPiece[][]) getCurrentState().getBoard());
+            getPreviousStates().add(getCurrentState());
+            setCurrentState(getNewStateFromPlayer());
+            setTurnCount(getTurnCount() + 1);
             gameResult = getGameResult();
         }
 
@@ -65,18 +65,18 @@ public class Chess<T extends ChessState> extends BoardGame
         GameResult gameResult = getGameResult();
         while(!(gameResult.isGameFinished()))
         {
-            ChessBoardUtils.displayBoard((ChessPiece[][]) currentState.getBoard());
-            previousStates.add(currentState);
-            if(currentState.getPlayerToMove() == player)
+            ChessBoardUtils.displayBoard((ChessPiece[][]) getCurrentState().getBoard());
+            getPreviousStates().add(getCurrentState());
+            if(getCurrentState().getPlayerToMove() == player)
             {
-                currentState = getNewStateFromPlayer();
+                setCurrentState(getNewStateFromPlayer());
             }
             else
             {
-                currentState = bot.findBestNextState(currentState, searchDepth);
+                setCurrentState(bot.findBestNextState(getCurrentState(), searchDepth));
             }
 
-            turnCount++;
+            setTurnCount(getTurnCount() + 1);
             gameResult = getGameResult();
         }
 
@@ -103,13 +103,13 @@ public class Chess<T extends ChessState> extends BoardGame
     @Override
     protected GameResult getGameResult() throws BoardGameException
     {
-        List<T> possibleStates = currentState.getAllPossibleStates();
+        Collection<T> possibleStates = currentState.getAllPossibleStates();
         if (possibleStates.isEmpty())
         {
-            if(((T)currentState).kingIsUnderCheck(currentState.getPlayerToMove()))
+            if(((T)getCurrentState()).kingIsUnderCheck(getCurrentState().getPlayerToMove()))
             {
                 Player winner;
-                if(currentState.getPlayerToMove() == Player.WHITE)
+                if(getCurrentState().getPlayerToMove() == Player.WHITE)
                 {
                     winner = Player.BLACK;
                 }
@@ -140,7 +140,7 @@ public class Chess<T extends ChessState> extends BoardGame
         T newState;
         try
         {
-            newState = (T) inputGetter.getChessStateInputFromUser((T) currentState);
+            newState = (T) inputGetter.getChessStateInputFromUser((T) getCurrentState());
         }
         catch (BoardGameException e)
         {

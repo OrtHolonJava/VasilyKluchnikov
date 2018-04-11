@@ -3,14 +3,15 @@ package boardgame;
 import bots.BoardGameBot;
 import enums.Player;
 import exceptions.BoardGameException;
+import exceptions.stateExceptions.InvalidStateChangeException;
 import gameStates.BoardGameState;
 import gameStates.ChessState;
 import pieces.chessPieces.ChessPiece;
+import ui.GameInputGetter;
 import utils.ChessBoardUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 /**
  * Created by divided on 19.03.2018.
@@ -21,40 +22,16 @@ public class Chess<T extends ChessState> extends BoardGame
 
     private static final String STARTING_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
 
-    @Override
-    protected BoardGameState getStartingState()
-    {
-        return ChessBoardUtils.getStateFromFen(STARTING_FEN);
-    }
-
     public Chess()
     {
         super();
         previousStates = new ArrayList<ChessState>();
     }
 
-    @Override
-    protected GameResult getGameResult() throws BoardGameException
-    {
-        List<T> possibleStates = currentState.getAllPossibleStates();
-        if (possibleStates.isEmpty())
-        {
-            if(((T)currentState).kingIsUnderCheck(currentState.getPlayerToMove()))
-            {
-                Player winner = (currentState.getPlayerToMove() == Player.WHITE) ? Player.BLACK : Player.WHITE;
-                return new GameResult(true, winner);
-            }
-            else
-            {
-                return new GameResult(true, null);
-            }
-        }
-        else
-        {
-            return new GameResult(false, null);
-        }
-    }
-
+    /*
+            Starts a player vs. player game and manages it
+            Manages turn order, input and stops the game when its finished
+    */
     @Override
     public void playGame() throws BoardGameException
     {
@@ -63,15 +40,7 @@ public class Chess<T extends ChessState> extends BoardGame
         {
             ChessBoardUtils.displayBoard((ChessPiece[][]) currentState.getBoard());
             previousStates.add(currentState);
-            try
-            {
-                currentState = getNewStateFromPlayer();
-            }
-            catch (BoardGameException e)
-            {
-                System.out.println("Error getting new state from player!");
-                e.printStackTrace();
-            }
+            currentState = getNewStateFromPlayer();
             turnCount++;
             gameResult = getGameResult();
         }
@@ -86,6 +55,10 @@ public class Chess<T extends ChessState> extends BoardGame
         }
     }
 
+    /*
+        Starts a player vs. bot game and manages it
+        Manages turn order, input and stops the game when its finished
+     */
     @Override
     public void playBotGame(BoardGameBot bot, int searchDepth, Player player) throws BoardGameException
     {
@@ -117,46 +90,63 @@ public class Chess<T extends ChessState> extends BoardGame
         }
     }
 
-
     @Override
-    protected T getNewStateFromPlayer() throws BoardGameException
+    protected BoardGameState getStartingState()
     {
-        System.out.println("Enter position of piece to move: ");
-        BoardPosition piecePosition = getPositionFromPlayer();
-        List<BoardPosition> possiblePositions = ((T)currentState).getPossiblePositionsForPiece(piecePosition);
-
-        for(int i = 0; i < possiblePositions.size(); i++)
-        {
-            BoardPosition possiblePosition = possiblePositions.get(i);
-            ChessState newState = ((T)currentState).getStateAfterMove(piecePosition, possiblePosition);
-            if(newState.kingIsUnderCheck(((T)currentState).getPlayerToMove()))
-            {
-                possiblePositions.remove(possiblePosition);
-            }
-        }
-
-
-        System.out.println("Possible options are: ");
-        for(int i = 1; i <= possiblePositions.size(); i++)
-        {
-            System.out.println(i + ".  " +
-                    possiblePositions.get(i - 1).getX() + "," + possiblePositions.get(i - 1).getY());
-        }
-        System.out.println("Enter the option: ");
-        int choice = scanner.nextInt();
-
-        return (T) ((T) currentState).getStateAfterMove(piecePosition, possiblePositions.get(choice - 1));
+        return ChessBoardUtils.getStateFromFen(STARTING_FEN);
     }
 
-
-    // Console input will be replaced with a gui
-    static Scanner scanner = new Scanner(System.in);
-    private static BoardPosition getPositionFromPlayer()
+    /*
+        Gets the game result for the ongoing game
+        Game result includes an indication if the game is finished, and the winning player (null if one doesn't exist)
+     */
+    @Override
+    protected GameResult getGameResult() throws BoardGameException
     {
-        System.out.print("x: ");
-        int x = scanner.nextInt();
-        System.out.print("y: ");
-        int y = scanner.nextInt();
-        return new BoardPosition(x, y);
+        List<T> possibleStates = currentState.getAllPossibleStates();
+        if (possibleStates.isEmpty())
+        {
+            if(((T)currentState).kingIsUnderCheck(currentState.getPlayerToMove()))
+            {
+                Player winner;
+                if(currentState.getPlayerToMove() == Player.WHITE)
+                {
+                    winner = Player.BLACK;
+                }
+                else
+                {
+                    winner = Player.WHITE;
+                }
+                return new GameResult(true, winner);
+            }
+            else
+            {
+                return new GameResult(true, null);
+            }
+        }
+        else
+        {
+            return new GameResult(false, null);
+        }
+    }
+
+    /*
+        Gets new state from the player
+     */
+    @Override
+    protected T getNewStateFromPlayer() throws InvalidStateChangeException
+    {
+        GameInputGetter inputGetter = new GameInputGetter();
+        T newState;
+        try
+        {
+            newState = (T) inputGetter.getChessStateInputFromUser((T) currentState);
+        }
+        catch (BoardGameException e)
+        {
+            e.printStackTrace();
+            throw new InvalidStateChangeException("Error getting state input from player");
+        }
+        return newState;
     }
 }

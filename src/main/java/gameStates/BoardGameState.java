@@ -12,7 +12,7 @@ import java.util.List;
 public abstract class BoardGameState<T extends Piece>
 {
     protected T[][] board;
-    Player playerToMove;
+    private Player playerToMove;
 
     public BoardGameState(T[][] board, Player playerToMove)
     {
@@ -31,6 +31,9 @@ public abstract class BoardGameState<T extends Piece>
         }
     }
 
+    /*
+        Returns all states that are possible after this state
+     */
     public abstract List<BoardGameState<T>> getAllPossibleStates() throws BoardGameException;
 
     public T[][] getBoard()
@@ -41,5 +44,10 @@ public abstract class BoardGameState<T extends Piece>
     public Player getPlayerToMove()
     {
         return playerToMove;
+    }
+
+    public void setPlayerToMove(Player playerToMove)
+    {
+        this.playerToMove = playerToMove;
     }
 }

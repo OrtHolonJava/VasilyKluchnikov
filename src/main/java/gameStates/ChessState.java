@@ -50,16 +50,9 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
                     for(BoardPosition possiblePosition : possiblePositions)
                     {
                         ChessState<T> newState = getStateAfterMove(piecePosition, possiblePosition);
-                        try
+                        if(!(newState.kingIsUnderCheck(getPlayerToMove())))
                         {
-                            if(!(newState.kingIsUnderCheck(getPlayerToMove())))
-                            {
-                                possibleStates.add(newState);
-                            }
-                        }
-                        catch (KingNotFoundException e)
-                        {
-                            e.printStackTrace();
+                            possibleStates.add(newState);
                         }
                     }
                 }

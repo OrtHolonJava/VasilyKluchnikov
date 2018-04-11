@@ -62,6 +62,7 @@ public class ChessBot extends BoardGameBot
         }
         catch (BoardGameException exception)
         {
+            exception.printStackTrace();
             throw new BotMoveSearchException("Failed to evaluate the position");
         }
         return minimaxResult.getBestState();
@@ -87,6 +88,7 @@ public class ChessBot extends BoardGameBot
         pieceNameToValueMap.put(Queen.class.getSimpleName(), QUEEN_VALUE);
         pieceNameToValueMap.put(King.class.getSimpleName(), KING_VALUE);
     }
+
     /*
         Returns a numerical value for a given piece
      */

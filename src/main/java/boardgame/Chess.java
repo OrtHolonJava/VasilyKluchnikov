@@ -3,6 +3,7 @@ package boardgame;
 import bots.BoardGameBot;
 import enums.Player;
 import exceptions.BoardGameException;
+import exceptions.stateExceptions.InvalidStateChangeException;
 import gameStates.BoardGameState;
 import gameStates.ChessState;
 import pieces.chessPieces.ChessPiece;
@@ -40,15 +41,7 @@ public class Chess<T extends ChessState> extends BoardGame
         {
             ChessBoardUtils.displayBoard((ChessPiece[][]) currentState.getBoard());
             previousStates.add(currentState);
-            try
-            {
-                currentState = getNewStateFromPlayer();
-            }
-            catch (BoardGameException e)
-            {
-                System.out.println("Error getting new state from player!");
-                e.printStackTrace();
-            }
+            currentState = getNewStateFromPlayer();
             turnCount++;
             gameResult = getGameResult();
         }
@@ -138,14 +131,23 @@ public class Chess<T extends ChessState> extends BoardGame
         }
     }
 
-
     /*
         Gets new state from the player
      */
     @Override
-    protected T getNewStateFromPlayer() throws BoardGameException
+    protected T getNewStateFromPlayer() throws InvalidStateChangeException
     {
         InputGetter inputGetter = new InputGetter();
-        return (T)inputGetter.getChessStateInputFromUser((T)currentState);
+        T newState;
+        try
+        {
+            newState = (T) inputGetter.getChessStateInputFromUser((T) currentState);
+        }
+        catch (BoardGameException e)
+        {
+            e.printStackTrace();
+            throw new InvalidStateChangeException("Error getting state input from player");
+        }
+        return newState;
     }
 }

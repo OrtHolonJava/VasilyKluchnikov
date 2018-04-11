@@ -81,7 +81,7 @@ public class ChessBoardUtils
         System.out.println();
         for (int j = 0; j < board[0].length; j++)
         {
-            System.out.print(" " + j + " ");
+            System.out.printf("%5d", j);
         }
         System.out.println();
 
@@ -89,10 +89,10 @@ public class ChessBoardUtils
         {
             for(int y = 0; y < board[0].length; y++)
             {
-                String charToPrint = getStringRepresentationFromPiece(board[x][y]);
-                System.out.print(" " + charToPrint + " ");
+                String stringToPrint = getStringRepresentationFromPiece(board[x][y]);
+                System.out.printf("%5s", stringToPrint);
             }
-            System.out.println("  " + x);
+            System.out.printf("%5d\n", x);
         }
         System.out.println();
     }

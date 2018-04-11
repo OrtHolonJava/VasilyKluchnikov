@@ -54,7 +54,6 @@ public class BoardPosition
         return x == position.x && y == position.y;
     }
 
-
     public int getX()
     {
         return x;

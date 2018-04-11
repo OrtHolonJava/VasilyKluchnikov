@@ -10,7 +10,7 @@ import java.util.Scanner;
 /**
  * Created by divided on 10.04.2018.
  */
-public class InputGetter
+public class GameInputGetter
 {
     /*
         Returns next chess state using player input

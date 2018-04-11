@@ -7,12 +7,11 @@ import exceptions.stateExceptions.InvalidStateChangeException;
 import gameStates.BoardGameState;
 import gameStates.ChessState;
 import pieces.chessPieces.ChessPiece;
-import ui.InputGetter;
+import ui.GameInputGetter;
 import utils.ChessBoardUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 /**
  * Created by divided on 19.03.2018.
@@ -137,7 +136,7 @@ public class Chess<T extends ChessState> extends BoardGame
     @Override
     protected T getNewStateFromPlayer() throws InvalidStateChangeException
     {
-        InputGetter inputGetter = new InputGetter();
+        GameInputGetter inputGetter = new GameInputGetter();
         T newState;
         try
         {

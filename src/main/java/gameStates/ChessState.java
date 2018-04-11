@@ -83,29 +83,7 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
         List<BoardPosition> possiblePositions = new ArrayList<BoardPosition>();
         for (ChessDirectionVector directionVector : (List<ChessDirectionVector>)piece.getDirectionVectors())
         {
-            BoardPosition positionChange = getPositionChangeFromDirectionVector(directionVector, piece.getPlayer());
-
-            BoardPosition newPosition = new BoardPosition(piecePosition);
-            newPosition.addToPosition(positionChange);
-            if(isPositionLegalToMoveOn(newPosition, piece.getPlayer()))
-            {
-                possiblePositions.add(newPosition);
-                if(directionVector.isRepeating() && getBoard()[newPosition.getX()][newPosition.getY()] == null)
-                {
-                    newPosition = new BoardPosition(newPosition);
-                    newPosition.addToPosition(positionChange);
-                    while(isPositionLegalToMoveOn(newPosition, piece.getPlayer()))
-                    {
-                        possiblePositions.add(newPosition);
-                        if(getBoard()[newPosition.getX()][newPosition.getY()] != null)
-                        {
-                            break; // In case a piece is captured
-                        }
-                        newPosition = new BoardPosition(newPosition);
-                        newPosition.addToPosition(positionChange);
-                    }
-                }
-            }
+            possiblePositions.addAll(getPossiblePositionsForDirection(directionVector, piecePosition));
         }
         
         return possiblePositions;
@@ -210,6 +188,39 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
             }
         }
 
+        return possiblePositions;
+    }
+
+    /*
+        Given a direction and position piece, returns all possible positions for the piece using this direction
+     */
+    private List<BoardPosition> getPossiblePositionsForDirection(ChessDirectionVector directionVector, BoardPosition piecePosition)
+    {
+        T piece = getPieceByPosition(piecePosition);
+        List<BoardPosition> possiblePositions = new ArrayList<BoardPosition>();
+        BoardPosition positionChange = getPositionChangeFromDirectionVector(directionVector, piece.getPlayer());
+
+        BoardPosition newPosition = new BoardPosition(piecePosition);
+        newPosition.addToPosition(positionChange);
+        if(isPositionLegalToMoveOn(newPosition, piece.getPlayer()))
+        {
+            possiblePositions.add(newPosition);
+            if(directionVector.isRepeating() && getBoard()[newPosition.getX()][newPosition.getY()] == null)
+            {
+                newPosition = new BoardPosition(newPosition);
+                newPosition.addToPosition(positionChange);
+                while(isPositionLegalToMoveOn(newPosition, piece.getPlayer()))
+                {
+                    possiblePositions.add(newPosition);
+                    if(getBoard()[newPosition.getX()][newPosition.getY()] != null)
+                    {
+                        break; // In case a piece is captured
+                    }
+                    newPosition = new BoardPosition(newPosition);
+                    newPosition.addToPosition(positionChange);
+                }
+            }
+        }
         return possiblePositions;
     }
 
@@ -320,5 +331,13 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
         {
             return x != 1;
         }
+    }
+
+    /*
+        Returns a piece, using it's positions on the board
+     */
+    private T getPieceByPosition(BoardPosition piecePosition)
+    {
+        return getBoard()[piecePosition.getX()][piecePosition.getY()];
     }
 }

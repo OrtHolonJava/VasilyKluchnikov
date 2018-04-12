@@ -40,7 +40,7 @@ public class Pawn extends ChessPiece
         return chessDirectionVectors;
     }
 
-    public List<ChessDirectionVector> getAttackDirectionVectors()
+    public Collection<ChessDirectionVector> getAttackDirectionVectors()
     {
         return attackDirectionVectors;
     }

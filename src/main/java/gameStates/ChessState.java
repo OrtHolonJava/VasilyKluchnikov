@@ -10,7 +10,6 @@ import pieces.chessPieces.ChessPiece;
 import pieces.chessPieces.King;
 import pieces.chessPieces.Pawn;
 import pieces.chessPieces.Queen;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -20,6 +19,7 @@ import java.util.List;
  */
 public class ChessState<T extends ChessPiece> extends BoardGameState<T>
 {
+    private BoardPosition positionOfDoubleMovedPawnLastTurn;
 
     public ChessState(T[][] board, Player playerToMove)
     {
@@ -70,12 +70,12 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
     {
         int x = piecePosition.getX(), y = piecePosition.getY();
 
-        if(!isPositionOnBoard(piecePosition) || getBoard()[x][y] == null)
+        if(!isValidPiecePosition(piecePosition))
         {
             throw new InvalidPositionException("Invalid position for the piece");
         }
 
-        T piece = getBoard()[x][y];
+        T piece = getPieceByPosition(piecePosition);
         if (piece instanceof Pawn)
         {
             return getPossiblePositionsForPawn(piecePosition);
@@ -95,16 +95,8 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
      */
     public ChessState<T> getStateAfterMove(BoardPosition oldPosition, BoardPosition newPosition)
     {
-        return getStateAfterMove(oldPosition.getX(), oldPosition.getY(), newPosition.getX(), newPosition.getY());
-    }
-
-    /*
-        Gets the new state after making a move on the current state
-     */
-    public ChessState<T> getStateAfterMove(int oldX, int oldY, int newX, int newY)
-    {
         ChessState<T> newState = new ChessState<T>(this);
-        T pieceToMove = newState.getBoard()[oldX][oldY];
+        T pieceToMove = newState.getPieceByPosition(oldPosition);
         if(pieceToMove.getPlayer() == Player.WHITE)
         {
             newState.setPlayerToMove(Player.BLACK);
@@ -113,11 +105,16 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
         {
             newState.setPlayerToMove(Player.WHITE);
         }
-        newState.getBoard()[newX][newY] = pieceToMove;
-        newState.getBoard()[oldX][oldY] = null;
-        if(pieceNeedsToBePromoted(newX, pieceToMove))
+
+        changeNewStateBasedOnSpecialPawnMoves(newState, oldPosition, newPosition);
+
+        newState.setPieceByPosition(pieceToMove, newPosition);
+        newState.setPieceByPosition(null , oldPosition);
+
+        if(pieceNeedsToBePromoted(newPosition.getX(), pieceToMove))
         {
-            newState.getBoard()[newX][newY] = (T)new Queen(pieceToMove.getPlayer());
+            T promotedPiece = (T)new Queen(pieceToMove.getPlayer());
+            newState.setPieceByPosition(promotedPiece, newPosition);
         }
         return newState;
     }
@@ -143,49 +140,143 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
     }
 
     /*
+       Changes the new state based on special pawn moves (en-passant and double move)
+    */
+    private ChessState<T> changeNewStateBasedOnSpecialPawnMoves(ChessState<T> newState, BoardPosition oldPosition,
+                                                                BoardPosition newPosition)
+    {
+        if(isEnPassantMove(oldPosition, newPosition))
+        {
+            newState.setPieceByPosition(null, getPositionOfDoubleMovedPawnLastTurn());
+        }
+        else if(isDoublePawnMove(oldPosition, newPosition))
+        {
+            newState.setPositionOfDoubleMovedPawnLastTurn(newPosition);
+        }
+        else
+        {
+            newState.setPositionOfDoubleMovedPawnLastTurn(null);
+        }
+        return newState;
+    }
+
+    /*
         Gets all possible positions for the pawn on the given position (including moves that cause a check)
      */
     private Collection<BoardPosition> getPossiblePositionsForPawn(BoardPosition pawnPosition) throws InvalidPositionException
     {
-        int x = pawnPosition.getX(), y = pawnPosition.getY();
-
-        if(!isPositionOnBoard(pawnPosition) || getBoard()[x][y] == null || !(getBoard()[x][y] instanceof Pawn))
+        if(!isValidPawnPosition(pawnPosition))
         {
             throw new InvalidPositionException("Invalid position for the pawn");
         }
 
-        Pawn pawn = (Pawn)getBoard()[x][y];
         Collection<BoardPosition> possiblePositions = new ArrayList<BoardPosition>();
+
+        possiblePositions.addAll(getPawnRegularPositions(pawnPosition));
+        possiblePositions.addAll(getPawnAttackPositions(pawnPosition));
+        possiblePositions.addAll(getEnPassantPositions(pawnPosition));
+        return possiblePositions;
+    }
+
+    /*
+       Gets all regular positions (including double move) for the pawn on the given position
+    */
+    private Collection<BoardPosition> getPawnRegularPositions(BoardPosition pawnPosition) throws InvalidPositionException
+    {
+        if(!isValidPawnPosition(pawnPosition))
+        {
+            throw new InvalidPositionException("Invalid position for the pawn");
+        }
+
+        Pawn pawn = (Pawn)getPieceByPosition(pawnPosition);
+        Collection<BoardPosition> possiblePositions = new ArrayList<BoardPosition>();
+
         for (ChessDirectionVector directionVector : pawn.getDirectionVectors())
         {
-            BoardPosition positionChange = getPositionChangeFromDirectionVector(directionVector, pawn.getPlayer());
-            BoardPosition newPosition = new BoardPosition(pawnPosition);
-            newPosition.addToPosition(positionChange);
-            if(isPositionOnBoard(newPosition) && getBoard()[newPosition.getX()][newPosition.getY()] == null)
+            for(BoardPosition newPosition : getPossiblePositionsForDirection(directionVector, pawnPosition))
             {
-                possiblePositions.add(newPosition);
-                if(!hasPawnMoved(pawnPosition))
+                if(getPieceByPosition(newPosition) == null)
                 {
-                    newPosition = new BoardPosition(newPosition);
-                    newPosition.addToPosition(positionChange);
-                    if(getBoard()[newPosition.getX()][newPosition.getY()] == null)
+                    possiblePositions.add(newPosition);
+
+                    if(!hasPawnMoved(pawnPosition))
                     {
-                        possiblePositions.add(newPosition);
+                        BoardPosition positionChange = new BoardPosition
+                                (newPosition.getX() - pawnPosition.getX(), newPosition.getY() - pawnPosition.getY());
+                        BoardPosition doubleMovePosition = new BoardPosition(newPosition);
+                        doubleMovePosition.addToPosition(positionChange);
+
+                        if(isPositionOnBoard(doubleMovePosition) && getPieceByPosition(doubleMovePosition) == null)
+                        {
+                            possiblePositions.add(doubleMovePosition);
+                        }
                     }
                 }
             }
-
         }
+
+        return possiblePositions;
+    }
+
+    /*
+        Gets all attacking positions for the pawn on the given position
+     */
+    private Collection<BoardPosition> getPawnAttackPositions(BoardPosition pawnPosition) throws InvalidPositionException
+    {
+        if(!isValidPawnPosition(pawnPosition))
+        {
+            throw new InvalidPositionException("Invalid position for the pawn");
+        }
+
+        Pawn pawn = (Pawn)getPieceByPosition(pawnPosition);
+        Collection<BoardPosition> possiblePositions = new ArrayList<BoardPosition>();
 
         for(ChessDirectionVector directionVector : pawn.getAttackDirectionVectors())
         {
-            BoardPosition positionChange = getPositionChangeFromDirectionVector(directionVector, pawn.getPlayer());
-            BoardPosition newPosition = new BoardPosition(pawnPosition);
-            newPosition.addToPosition(positionChange);
-            if(isPositionLegalToMoveOn(newPosition, pawn.getPlayer()) &&
-                    getBoard()[newPosition.getX()][newPosition.getY()] != null)
+            for(BoardPosition newPosition : getPossiblePositionsForDirection(directionVector, pawnPosition))
             {
-                possiblePositions.add(newPosition);
+                if(getPieceByPosition(newPosition) != null)
+                {
+                    possiblePositions.add(newPosition);
+                }
+            }
+        }
+        return possiblePositions;
+    }
+
+    /*
+        Gets all en-passant positions for the pawn on the given position
+     */
+    private Collection<BoardPosition> getEnPassantPositions(BoardPosition pawnPosition) throws InvalidPositionException
+    {
+        if(!isValidPawnPosition(pawnPosition))
+        {
+            throw new InvalidPositionException("Invalid position for the pawn");
+        }
+
+        Collection<BoardPosition> possiblePositions = new ArrayList<BoardPosition>();
+
+        if(getPositionOfDoubleMovedPawnLastTurn() != null)
+        {
+            int doubleMovedX = getPositionOfDoubleMovedPawnLastTurn().getX(),
+                    doubleMovedY = getPositionOfDoubleMovedPawnLastTurn().getY();
+            BoardPosition newPossiblePosition = new BoardPosition(getPositionOfDoubleMovedPawnLastTurn());
+
+            if(getPieceByPosition(getPositionOfDoubleMovedPawnLastTurn()).getPlayer() == Player.WHITE)
+            {
+                newPossiblePosition.addToPosition(1, 0);
+            }
+            else
+            {
+                newPossiblePosition.addToPosition(-1, 0);
+            }
+            BoardPosition leftValidPawnPosition = new BoardPosition(doubleMovedX, doubleMovedY - 1),
+                    rightValidPawnPosition = new BoardPosition(doubleMovedX, doubleMovedY + 1);
+
+            if ((isPositionOnBoard(leftValidPawnPosition) && leftValidPawnPosition.equals(pawnPosition))
+                    || (isPositionOnBoard(rightValidPawnPosition) && rightValidPawnPosition.equals(pawnPosition)))
+            {
+                possiblePositions.add(newPossiblePosition);
             }
         }
 
@@ -206,14 +297,14 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
         if(isPositionLegalToMoveOn(newPosition, piece.getPlayer()))
         {
             possiblePositions.add(newPosition);
-            if(directionVector.isRepeating() && getBoard()[newPosition.getX()][newPosition.getY()] == null)
+            if(directionVector.isRepeating() && getPieceByPosition(newPosition) == null)
             {
                 newPosition = new BoardPosition(newPosition);
                 newPosition.addToPosition(positionChange);
                 while(isPositionLegalToMoveOn(newPosition, piece.getPlayer()))
                 {
                     possiblePositions.add(newPosition);
-                    if(getBoard()[newPosition.getX()][newPosition.getY()] != null)
+                    if(getPieceByPosition(newPosition) != null)
                     {
                         break; // In case a piece is captured
                     }
@@ -312,6 +403,9 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
                 (getBoard()[x][y] == null || getBoard()[x][y].getPlayer() != movingPlayer);
     }
 
+
+    private static final int WHITE_PAWN_START_X_POS = 6;
+    private static final int BLACK_PAWN_START_X_POS = 1;
     /*
         Checks if the pawn at the given position has moved
      */
@@ -319,18 +413,18 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
     {
         int x = pawnPosition.getX(), y = pawnPosition.getY();
 
-        if(!isPositionOnBoard(pawnPosition) || getBoard()[x][y] == null || !(getBoard()[x][y] instanceof Pawn))
+        if(!isValidPawnPosition(pawnPosition))
         {
             throw new InvalidPositionException("Invalid board position for the pawn");
         }
 
-        if(board[x][y].getPlayer() == Player.WHITE)
+        if(getPieceByPosition(pawnPosition).getPlayer() == Player.WHITE)
         {
-            return x != (getBoard().length - 2);
+            return x != WHITE_PAWN_START_X_POS;
         }
         else
         {
-            return x != 1;
+            return x != BLACK_PAWN_START_X_POS;
         }
     }
 
@@ -340,5 +434,60 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
     private T getPieceByPosition(BoardPosition piecePosition)
     {
         return getBoard()[piecePosition.getX()][piecePosition.getY()];
+    }
+
+    /*
+        Sets the board at the given position to the given piece (can be null)
+     */
+    private void setPieceByPosition(T piece, BoardPosition position)
+    {
+        getBoard()[position.getX()][position.getY()] = piece;
+    }
+
+    /*
+        Checks if a given position is a valid piece position
+     */
+    private boolean isValidPiecePosition(BoardPosition position)
+    {
+        return isPositionOnBoard(position) && getPieceByPosition(position) != null;
+    }
+
+    /*
+        Checks if the given position is a valid pawn position
+     */
+    private boolean isValidPawnPosition(BoardPosition position)
+    {
+        return isValidPiecePosition(position) && getPieceByPosition(position) instanceof Pawn;
+    }
+
+    /*
+        Checks if the change in position was an en passant move
+     */
+    private boolean isEnPassantMove(BoardPosition oldPos, BoardPosition newPos)
+    {
+        return isValidPawnPosition(oldPos)
+                && getPieceByPosition(newPos) == null
+                && oldPos.getY() != newPos.getY();
+    }
+
+
+    private static final int PAWN_DOUBLE_MOVE_X_CHANGE = 2;
+    /*
+        Checks if the change in position was a double pawn move
+     */
+    private boolean isDoublePawnMove(BoardPosition oldPos, BoardPosition newPos)
+    {
+        return isValidPawnPosition(oldPos)
+                && Math.abs(oldPos.getX() - newPos.getX()) == PAWN_DOUBLE_MOVE_X_CHANGE;
+    }
+
+    public BoardPosition getPositionOfDoubleMovedPawnLastTurn()
+    {
+        return positionOfDoubleMovedPawnLastTurn;
+    }
+
+    public void setPositionOfDoubleMovedPawnLastTurn(BoardPosition positionOfDoubleMovedPawnLastTurn)
+    {
+        this.positionOfDoubleMovedPawnLastTurn = positionOfDoubleMovedPawnLastTurn;
     }
 }

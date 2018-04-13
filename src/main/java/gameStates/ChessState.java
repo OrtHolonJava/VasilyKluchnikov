@@ -140,6 +140,39 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
     }
 
     /*
+       Gets the state result
+       State result includes an indication if the game is finished, and the winning player (null if one doesn't exist)
+    */
+    public StateResult getStateResult() throws BoardGameException
+    {
+        Collection<BoardGameState<T>> possibleStates = getAllPossibleStates();
+        if (possibleStates.isEmpty())
+        {
+            if(kingIsUnderCheck(getPlayerToMove()))
+            {
+                Player winner;
+                if(getPlayerToMove() == Player.WHITE)
+                {
+                    winner = Player.BLACK;
+                }
+                else
+                {
+                    winner = Player.WHITE;
+                }
+                return new StateResult(true, winner);
+            }
+            else
+            {
+                return new StateResult(true, null);
+            }
+        }
+        else
+        {
+            return new StateResult(false, null);
+        }
+    }
+
+    /*
        Changes the new state based on special pawn moves (en-passant and double move)
     */
     private ChessState<T> changeNewStateBasedOnSpecialPawnMoves(ChessState<T> newState, BoardPosition oldPosition,

@@ -38,12 +38,6 @@ public abstract class BoardGame<T extends BoardGameState>
     protected abstract T getStartingState();
 
     /*
-        Gets the game result for the ongoing game
-        Game result includes an indication if the game is finished, and the winning player (null if one doesn't exist)
-     */
-    protected abstract GameResult getGameResult() throws BoardGameException;
-
-    /*
         Gets new state from the player
      */
     protected abstract T getNewStateFromPlayer() throws BoardGameException;

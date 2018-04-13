@@ -6,6 +6,7 @@ import exceptions.BoardGameException;
 import exceptions.stateExceptions.InvalidStateChangeException;
 import gameStates.BoardGameState;
 import gameStates.ChessState;
+import gameStates.StateResult;
 import pieces.chessPieces.ChessPiece;
 import ui.BoardUI;
 import ui.GameInputGetter;
@@ -36,17 +37,17 @@ public class Chess<T extends ChessState> extends BoardGame
     @Override
     public void playGame() throws BoardGameException
     {
-        GameResult gameResult = getGameResult();
-        while(!(gameResult.isGameFinished()))
+        StateResult stateResult = getCurrentState().getStateResult();
+        while(!(stateResult.isGameFinished()))
         {
             BoardUI.displayBoard((ChessPiece[][]) getCurrentState().getBoard());
             getPreviousStates().add(getCurrentState());
             setCurrentState(getNewStateFromPlayer());
             setTurnCount(getTurnCount() + 1);
-            gameResult = getGameResult();
+            stateResult = getCurrentState().getStateResult();;
         }
 
-        BoardUI.outputWinner(gameResult);
+        BoardUI.outputWinner(stateResult);
     }
 
     /*
@@ -56,8 +57,8 @@ public class Chess<T extends ChessState> extends BoardGame
     @Override
     public void playBotGame(BoardGameBot bot, int searchDepth, Player player) throws BoardGameException
     {
-        GameResult gameResult = getGameResult();
-        while(!(gameResult.isGameFinished()))
+        StateResult stateResult = getCurrentState().getStateResult();
+        while(!(stateResult.isGameFinished()))
         {
             BoardUI.displayBoard((ChessPiece[][]) getCurrentState().getBoard());
             getPreviousStates().add(getCurrentState());
@@ -71,50 +72,16 @@ public class Chess<T extends ChessState> extends BoardGame
             }
 
             setTurnCount(getTurnCount() + 1);
-            gameResult = getGameResult();
+            stateResult = getCurrentState().getStateResult();
         }
 
-        BoardUI.outputWinner(gameResult);
+        BoardUI.outputWinner(stateResult);
     }
 
     @Override
     protected BoardGameState getStartingState()
     {
         return ChessBoardUtils.getStateFromFen(STARTING_FEN);
-    }
-
-    /*
-        Gets the game result for the ongoing game
-        Game result includes an indication if the game is finished, and the winning player (null if one doesn't exist)
-     */
-    @Override
-    protected GameResult getGameResult() throws BoardGameException
-    {
-        Collection<T> possibleStates = currentState.getAllPossibleStates();
-        if (possibleStates.isEmpty())
-        {
-            if(((T)getCurrentState()).kingIsUnderCheck(getCurrentState().getPlayerToMove()))
-            {
-                Player winner;
-                if(getCurrentState().getPlayerToMove() == Player.WHITE)
-                {
-                    winner = Player.BLACK;
-                }
-                else
-                {
-                    winner = Player.WHITE;
-                }
-                return new GameResult(true, winner);
-            }
-            else
-            {
-                return new GameResult(true, null);
-            }
-        }
-        else
-        {
-            return new GameResult(false, null);
-        }
     }
 
     /*

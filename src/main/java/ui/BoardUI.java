@@ -1,7 +1,7 @@
 package ui;
 
-import boardgame.GameResult;
 import enums.Player;
+import gameStates.StateResult;
 import pieces.chessPieces.*;
 
 import java.util.HashMap;
@@ -39,7 +39,7 @@ public class BoardUI
     /*
        Outputs the winner of the game accordingly to the game result
     */
-    public static void outputWinner(GameResult gameResult)
+    public static void outputWinner(StateResult gameResult)
     {
         if(gameResult.getWinner() != null)
         {

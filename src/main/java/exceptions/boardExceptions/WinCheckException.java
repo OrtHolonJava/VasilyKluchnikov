@@ -5,6 +5,8 @@ package exceptions.boardExceptions;
  */
 public class WinCheckException extends BoardException
 {
+    private static final long serialVersionUID = 1463736626593926227L;
+
     public WinCheckException(String message)
     {
         super(message);

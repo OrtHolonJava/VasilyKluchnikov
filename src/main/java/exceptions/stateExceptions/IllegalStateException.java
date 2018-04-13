@@ -5,6 +5,8 @@ package exceptions.stateExceptions;
  */
 public class IllegalStateException extends StateException
 {
+    private static final long serialVersionUID = 8294267768036625997L;
+
     public IllegalStateException(String message)
     {
         super(message);

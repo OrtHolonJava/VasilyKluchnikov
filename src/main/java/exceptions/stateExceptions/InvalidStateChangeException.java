@@ -5,6 +5,8 @@ package exceptions.stateExceptions;
  */
 public class InvalidStateChangeException extends StateException
 {
+    private static final long serialVersionUID = 1623405985647349769L;
+
     public InvalidStateChangeException(String message)
     {
         super(message);

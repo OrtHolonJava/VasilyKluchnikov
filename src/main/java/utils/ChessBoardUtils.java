@@ -5,8 +5,6 @@ import enums.Player;
 import gameStates.ChessState;
 import pieces.chessPieces.*;
 
-import java.util.Properties;
-
 /**
  * Created by divided on 22.03.2018.
  */
@@ -71,60 +69,5 @@ public class ChessBoardUtils
             }
         }
         return new ChessState<ChessPiece>(board, Player.WHITE);
-    }
-
-    /*
-        Textually outputs the current chess board
-     */
-    public static void displayBoard(ChessPiece[][] board)
-    {
-        System.out.println();
-        for (int j = 0; j < board[0].length; j++)
-        {
-            System.out.printf("%5d", j);
-        }
-        System.out.println();
-
-        for(int x = 0; x < board.length; x++)
-        {
-            for(int y = 0; y < board[0].length; y++)
-            {
-                String stringToPrint = getStringRepresentationFromPiece(board[x][y]);
-                System.out.printf("%5s", stringToPrint);
-            }
-            System.out.printf("%5d\n", x);
-        }
-        System.out.println();
-    }
-
-
-    private static Properties pieceNameToStringMap;
-
-    static
-    {
-        pieceNameToStringMap = new Properties();
-        pieceNameToStringMap.put(Pawn.class.getSimpleName(), "P");
-        pieceNameToStringMap.put(Knight.class.getSimpleName(), "N");
-        pieceNameToStringMap.put(Bishop.class.getSimpleName(), "B");
-        pieceNameToStringMap.put(Rook.class.getSimpleName(), "R");
-        pieceNameToStringMap.put(Queen.class.getSimpleName(), "Q");
-        pieceNameToStringMap.put(King.class.getSimpleName(), "K");
-    }
-
-    /*
-            Gets string representation for the chess piece
-    */
-    private static String getStringRepresentationFromPiece(ChessPiece piece)
-    {
-        if(piece == null)
-            return "-";
-
-        String st = pieceNameToStringMap.getProperty(piece.getClass().getSimpleName());
-
-        if(piece.getPlayer() == Player.BLACK)
-        {
-            st = st.toLowerCase();
-        }
-        return st;
     }
 }

@@ -7,6 +7,8 @@ import exceptions.ChessException;
  */
 public abstract class BoardException extends ChessException
 {
+    private static final long serialVersionUID = 7871420273065601906L;
+
     public BoardException(String message)
     {
         super(message);

@@ -23,7 +23,6 @@ public class GameInputGetter
         List<BoardPosition> possiblePositions = new ArrayList<BoardPosition>();
         possiblePositions.addAll(currentState.getPossiblePositionsForPiece(piecePosition));
 
-
         for(int i = 0; i < possiblePositions.size(); i++)
         {
             BoardPosition possiblePosition = possiblePositions.get(i);

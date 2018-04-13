@@ -7,6 +7,8 @@ import exceptions.ChessException;
  */
 public abstract class BotException extends ChessException
 {
+    private static final long serialVersionUID = 6944293598657086183L;
+
     public BotException(String message)
     {
         super(message);

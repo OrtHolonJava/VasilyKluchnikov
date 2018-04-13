@@ -5,6 +5,8 @@ package exceptions.botExceptions;
  */
 public class BotMoveSearchException extends BotException
 {
+    private static final long serialVersionUID = -2048492607648666001L;
+
     public BotMoveSearchException(String message)
     {
         super(message);

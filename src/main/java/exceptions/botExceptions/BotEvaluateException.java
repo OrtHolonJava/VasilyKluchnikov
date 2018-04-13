@@ -5,6 +5,8 @@ package exceptions.botExceptions;
  */
 public class BotEvaluateException extends BotException
 {
+    private static final long serialVersionUID = 1589400757625428659L;
+
     public BotEvaluateException(String message)
     {
         super(message);

@@ -5,14 +5,13 @@ import enums.Player;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 /**
  * Created by divided on 19.03.2018.
  */
 public class Bishop extends ChessPiece
 {
-    private static ArrayList<ChessDirectionVector> chessDirectionVectors = new ArrayList<ChessDirectionVector>()
+    private static Collection<ChessDirectionVector> chessDirectionVectors = new ArrayList<ChessDirectionVector>()
     {
         {
             add(new ChessDirectionVector(true,1, 1));

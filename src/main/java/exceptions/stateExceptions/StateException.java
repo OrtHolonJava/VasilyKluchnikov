@@ -7,6 +7,8 @@ import exceptions.ChessException;
  */
 public abstract class StateException extends ChessException
 {
+    private static final long serialVersionUID = -5363707938159935972L;
+
     public StateException(String message)
     {
         super(message);

@@ -472,6 +472,7 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
 
 
     private static final int PAWN_DOUBLE_MOVE_X_CHANGE = 2;
+
     /*
         Checks if the change in position was a double pawn move
      */

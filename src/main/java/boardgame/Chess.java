@@ -7,6 +7,7 @@ import exceptions.stateExceptions.InvalidStateChangeException;
 import gameStates.BoardGameState;
 import gameStates.ChessState;
 import pieces.chessPieces.ChessPiece;
+import ui.BoardUI;
 import ui.GameInputGetter;
 import utils.ChessBoardUtils;
 
@@ -38,21 +39,14 @@ public class Chess<T extends ChessState> extends BoardGame
         GameResult gameResult = getGameResult();
         while(!(gameResult.isGameFinished()))
         {
-            ChessBoardUtils.displayBoard((ChessPiece[][]) getCurrentState().getBoard());
+            BoardUI.displayBoard((ChessPiece[][]) getCurrentState().getBoard());
             getPreviousStates().add(getCurrentState());
             setCurrentState(getNewStateFromPlayer());
             setTurnCount(getTurnCount() + 1);
             gameResult = getGameResult();
         }
 
-        if(gameResult.getWinner() != null)
-        {
-            System.out.println("Winner: " + gameResult.getWinner().name());
-        }
-        else
-        {
-            System.out.println("Draw!");
-        }
+        BoardUI.outputWinner(gameResult);
     }
 
     /*
@@ -65,7 +59,7 @@ public class Chess<T extends ChessState> extends BoardGame
         GameResult gameResult = getGameResult();
         while(!(gameResult.isGameFinished()))
         {
-            ChessBoardUtils.displayBoard((ChessPiece[][]) getCurrentState().getBoard());
+            BoardUI.displayBoard((ChessPiece[][]) getCurrentState().getBoard());
             getPreviousStates().add(getCurrentState());
             if(getCurrentState().getPlayerToMove() == player)
             {
@@ -80,14 +74,7 @@ public class Chess<T extends ChessState> extends BoardGame
             gameResult = getGameResult();
         }
 
-        if(gameResult.getWinner() != null)
-        {
-            System.out.println("Winner: " + gameResult.getWinner().name());
-        }
-        else
-        {
-            System.out.println("Draw!");
-        }
+        BoardUI.outputWinner(gameResult);
     }
 
     @Override

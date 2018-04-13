@@ -5,6 +5,8 @@ package exceptions.boardExceptions;
  */
 public class KingNotFoundException extends BoardException
 {
+    private static final long serialVersionUID = -4545918156379742302L;
+
     public KingNotFoundException(String message)
     {
         super(message);

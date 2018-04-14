@@ -2,9 +2,10 @@ package ui;
 
 import boardgame.BoardPosition;
 import exceptions.BoardGameException;
+import exceptions.boardExceptions.InvalidInputPositionException;
 import gameStates.ChessState;
-
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Scanner;
 
@@ -13,26 +14,59 @@ import java.util.Scanner;
  */
 public class GameInputGetter
 {
+    private static Scanner scanner = new Scanner(System.in);
+
     /*
         Returns next chess state using player input
      */
     public ChessState getChessStateInputFromUser(ChessState currentState) throws BoardGameException
     {
         System.out.println("Enter position of piece to move: ");
-        BoardPosition piecePosition = getPositionFromPlayer();
-        List<BoardPosition> possiblePositions = new ArrayList<BoardPosition>();
-        possiblePositions.addAll(currentState.getPossiblePositionsForPiece(piecePosition));
-
-        for(int i = 0; i < possiblePositions.size(); i++)
+        BoardPosition piecePosition;
+        try
         {
-            BoardPosition possiblePosition = possiblePositions.get(i);
-            ChessState newState = currentState.getStateAfterMove(piecePosition, possiblePosition);
-            if(newState.kingIsUnderCheck(currentState.getPlayerToMove()))
+            piecePosition = getPositionFromPlayer(currentState);
+        }
+        catch (InvalidInputPositionException e)
+        {
+            System.out.println("Error in choosing a position: " + e.getMessage() +".\nTry inputting again.\n");
+            return getChessStateInputFromUser(currentState);
+        }
+
+        Collection<BoardPosition> unfilteredPossiblePositions = currentState.getPossiblePositionsForPiece(piecePosition);
+        List<BoardPosition> possiblePositions = new ArrayList<BoardPosition>();
+
+        for(BoardPosition unfilteredPosition : unfilteredPossiblePositions)
+        {
+            ChessState newState = currentState.getStateAfterMove(piecePosition, unfilteredPosition);
+            if(currentState.isMoveLegal(newState, piecePosition, unfilteredPosition))
             {
-                possiblePositions.remove(possiblePosition);
+                possiblePositions.add(unfilteredPosition);
             }
         }
 
+        int choice;
+        try
+        {
+            choice = getUsersChoiceOfPosition(possiblePositions);
+        }
+        catch (InvalidInputPositionException e)
+        {
+            System.out.println("Error in choosing a position: " + e.getMessage() +".\nTry inputting again.\n");
+            return getChessStateInputFromUser(currentState);
+        }
+        return currentState.getStateAfterMove(piecePosition, possiblePositions.get(choice - 1));
+    }
+
+    /*
+        Gets the user choice for a positions, from all possible new positions
+     */
+    private static int getUsersChoiceOfPosition(List<BoardPosition> possiblePositions) throws InvalidInputPositionException
+    {
+        if(possiblePositions.size() == 0)
+        {
+            throw new InvalidInputPositionException("The piece inputted has no moves");
+        }
 
         System.out.println("Possible options are: ");
         for(int i = 1; i <= possiblePositions.size(); i++)
@@ -43,20 +77,29 @@ public class GameInputGetter
         System.out.println("Enter the option: ");
         int choice = scanner.nextInt();
 
-        return currentState.getStateAfterMove(piecePosition, possiblePositions.get(choice - 1));
-    }
+        if(choice < 1 || choice > possiblePositions.size())
+        {
+            throw new InvalidInputPositionException("Incorrect input for the option");
+        }
 
-    static Scanner scanner = new Scanner(System.in);
+        return choice;
+    }
 
     /*
         Returns a position given by the player input
      */
-    private static BoardPosition getPositionFromPlayer()
+    private static BoardPosition getPositionFromPlayer(ChessState currentState) throws InvalidInputPositionException
     {
         System.out.print("x: ");
         int x = scanner.nextInt();
         System.out.print("y: ");
         int y = scanner.nextInt();
-        return new BoardPosition(x, y);
+        BoardPosition inputtedPosition = new BoardPosition(x, y);
+        if(!currentState.isValidPiecePosition(inputtedPosition))
+        {
+            throw new InvalidInputPositionException("The inputted position is not a valid piece position");
+        }
+
+        return inputtedPosition;
     }
 }

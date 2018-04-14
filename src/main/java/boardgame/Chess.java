@@ -3,6 +3,7 @@ package boardgame;
 import bots.BoardGameBot;
 import enums.Player;
 import exceptions.BoardGameException;
+import exceptions.boardExceptions.InvalidInputPositionException;
 import exceptions.stateExceptions.InvalidStateChangeException;
 import gameStates.BoardGameState;
 import gameStates.ChessState;
@@ -31,8 +32,8 @@ public class Chess<T extends ChessState> extends BoardGame
     }
 
     /*
-            Starts a player vs. player game and manages it
-            Manages turn order, input and stops the game when its finished
+        Starts a player vs. player game and manages it
+        Manages turn order, input and stops the game when its finished
     */
     @Override
     public void playGame() throws BoardGameException
@@ -47,6 +48,7 @@ public class Chess<T extends ChessState> extends BoardGame
             stateResult = getCurrentState().getStateResult();;
         }
 
+        BoardUI.displayBoard((ChessPiece[][]) getCurrentState().getBoard());
         BoardUI.outputWinner(stateResult);
     }
 
@@ -75,13 +77,14 @@ public class Chess<T extends ChessState> extends BoardGame
             stateResult = getCurrentState().getStateResult();
         }
 
+        BoardUI.displayBoard((ChessPiece[][]) getCurrentState().getBoard());
         BoardUI.outputWinner(stateResult);
     }
 
     @Override
     protected BoardGameState getStartingState()
     {
-        return ChessBoardUtils.getStateFromFen(STARTING_FEN);
+        return ChessBoardUtils.getStateFromFen("1rbqkbnr/ppp1pppp/2n1p3/1N6/P2P1B2/3B3P/1PP2PP1/R2QK2R");
     }
 
     /*
@@ -99,8 +102,9 @@ public class Chess<T extends ChessState> extends BoardGame
         catch (BoardGameException e)
         {
             e.printStackTrace();
-            throw new InvalidStateChangeException("Error getting state input from player");
+            throw new InvalidStateChangeException("Invalid change to the state");
         }
+
         return newState;
     }
 }

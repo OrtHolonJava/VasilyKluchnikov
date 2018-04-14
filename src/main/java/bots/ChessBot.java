@@ -16,6 +16,26 @@ import java.util.Map;
  */
 public class ChessBot extends BoardGameBot
 {
+    private static final double PAWN_VALUE = 1;
+    private static final double KNIGHT_VALUE = 3.2;
+    private static final double BISHOP_VALUE = 3.3;
+    private static final double ROOK_VALUE = 5;
+    private static final double QUEEN_VALUE = 9;
+    private static final double KING_VALUE = 500;
+
+    private static Map<String, Double> pieceNameToValueMap;
+
+    static
+    {
+        pieceNameToValueMap = new HashMap<String, Double>();
+        pieceNameToValueMap.put(Pawn.class.getSimpleName(), PAWN_VALUE);
+        pieceNameToValueMap.put(Knight.class.getSimpleName(), KNIGHT_VALUE);
+        pieceNameToValueMap.put(Bishop.class.getSimpleName(), BISHOP_VALUE);
+        pieceNameToValueMap.put(Rook.class.getSimpleName(), ROOK_VALUE);
+        pieceNameToValueMap.put(Queen.class.getSimpleName(), QUEEN_VALUE);
+        pieceNameToValueMap.put(King.class.getSimpleName(), KING_VALUE);
+    }
+
     /*
         Gives an evaluation, a numerical score, to a state
         The evaluation is positive for one player, negative for another
@@ -68,26 +88,6 @@ public class ChessBot extends BoardGameBot
         return minimaxResult.getBestState();
     }
 
-
-    private static final double PAWN_VALUE = 1;
-    private static final double KNIGHT_VALUE = 3.2;
-    private static final double BISHOP_VALUE = 3.3;
-    private static final double ROOK_VALUE = 5;
-    private static final double QUEEN_VALUE = 9;
-    private static final double KING_VALUE = 500;
-
-    private static Map<String, Double> pieceNameToValueMap;
-
-    static
-    {
-        pieceNameToValueMap = new HashMap<String, Double>();
-        pieceNameToValueMap.put(Pawn.class.getSimpleName(), PAWN_VALUE);
-        pieceNameToValueMap.put(Knight.class.getSimpleName(), KNIGHT_VALUE);
-        pieceNameToValueMap.put(Bishop.class.getSimpleName(), BISHOP_VALUE);
-        pieceNameToValueMap.put(Rook.class.getSimpleName(), ROOK_VALUE);
-        pieceNameToValueMap.put(Queen.class.getSimpleName(), QUEEN_VALUE);
-        pieceNameToValueMap.put(King.class.getSimpleName(), KING_VALUE);
-    }
 
     /*
         Returns a numerical value for a given piece

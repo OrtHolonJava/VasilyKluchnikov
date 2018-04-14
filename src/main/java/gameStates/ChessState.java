@@ -6,10 +6,7 @@ import enums.Player;
 import exceptions.BoardGameException;
 import exceptions.boardExceptions.InvalidPositionException;
 import exceptions.boardExceptions.KingNotFoundException;
-import pieces.chessPieces.ChessPiece;
-import pieces.chessPieces.King;
-import pieces.chessPieces.Pawn;
-import pieces.chessPieces.Queen;
+import pieces.chessPieces.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -19,16 +16,35 @@ import java.util.List;
  */
 public class ChessState<T extends ChessPiece> extends BoardGameState<T>
 {
+    private static final int WHITE_PAWN_START_X_POS = 6;
+    private static final int BLACK_PAWN_START_X_POS = 1;
+    private static final int PAWN_DOUBLE_MOVE_X_CHANGE = 2;
+
     private BoardPosition positionOfDoubleMovedPawnLastTurn;
+
+    private ChessPieceMoveStatus moveStatus;
+
+    private static final BoardPosition whiteQueenSideRookStartPosition, whiteKingSideRookStartPosition,
+            blackQueenSideRookStartPosition, blackKingSideRookStartPosition;
+
+    static
+    {
+        whiteQueenSideRookStartPosition = new BoardPosition(7, 0);
+        whiteKingSideRookStartPosition = new BoardPosition(7, 7);
+        blackQueenSideRookStartPosition = new BoardPosition(0, 0);
+        blackKingSideRookStartPosition = new BoardPosition(0, 7);
+    }
 
     public ChessState(T[][] board, Player playerToMove)
     {
         super(board, playerToMove);
+        moveStatus = new ChessPieceMoveStatus();
     }
 
     public ChessState(ChessState<T> state)
     {
         super(state);
+        setMoveStatus(new ChessPieceMoveStatus(state.getMoveStatus()));
     }
 
     /*
@@ -38,7 +54,6 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
     public Collection<BoardGameState<T>> getAllPossibleStates() throws BoardGameException
     {
         Collection<BoardGameState<T>> possibleStates = new ArrayList<BoardGameState<T>>();
-        
         for(int x = 0; x < getBoard().length; x++)
         {
             for(int y = 0; y < getBoard()[0].length; y++)
@@ -51,7 +66,7 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
                     for(BoardPosition possiblePosition : possiblePositions)
                     {
                         ChessState<T> newState = getStateAfterMove(piecePosition, possiblePosition);
-                        if(!(newState.kingIsUnderCheck(getPlayerToMove())))
+                        if(isMoveLegal(newState, piecePosition, possiblePosition))
                         {
                             possibleStates.add(newState);
                         }
@@ -64,12 +79,41 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
     }
 
     /*
+        Returns a piece, using it's positions on the board
+     */
+    public T getPieceByPosition(BoardPosition piecePosition)
+    {
+        return getBoard()[piecePosition.getX()][piecePosition.getY()];
+    }
+
+    /*
+        Returns if the move is legal (with the check and castling rules), for the move and the state after the move
+     */
+    public boolean isMoveLegal(ChessState<T> newState, BoardPosition currentPosition, BoardPosition newPosition) throws BoardGameException
+    {
+        if(isCastlingMove(currentPosition, newPosition))
+        {
+            if(!isValidCastle(currentPosition, newPosition))
+            {
+                return false;
+            }
+        }
+        else
+        {
+            if(newState.kingIsUnderCheck(getPlayerToMove()))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /*
         Returns all possible board positions for a single piece (including positions that cause checks)
      */
     public Collection<BoardPosition> getPossiblePositionsForPiece(BoardPosition piecePosition) throws InvalidPositionException
     {
-        int x = piecePosition.getX(), y = piecePosition.getY();
-
         if(!isValidPiecePosition(piecePosition))
         {
             throw new InvalidPositionException("Invalid position for the piece");
@@ -86,6 +130,11 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
         {
             possiblePositions.addAll(getPossiblePositionsForDirection(directionVector, piecePosition));
         }
+
+        if(piece instanceof King)
+        {
+            possiblePositions.addAll(getCastlingPositions(piecePosition));
+        }
         
         return possiblePositions;
     }
@@ -93,23 +142,21 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
     /*
         Gets the new state after making a move on the current state
      */
-    public ChessState<T> getStateAfterMove(BoardPosition oldPosition, BoardPosition newPosition)
+    public ChessState<T> getStateAfterMove(BoardPosition currentPosition, BoardPosition newPosition) throws KingNotFoundException
     {
         ChessState<T> newState = new ChessState<T>(this);
-        T pieceToMove = newState.getPieceByPosition(oldPosition);
-        if(pieceToMove.getPlayer() == Player.WHITE)
-        {
-            newState.setPlayerToMove(Player.BLACK);
-        }
-        else
-        {
-            newState.setPlayerToMove(Player.WHITE);
-        }
+        T pieceToMove = newState.getPieceByPosition(currentPosition);
+        newState.setPlayerToMove(Player.getOppositePlayer(pieceToMove.getPlayer()));
+        changeNewStateBasedOnSpecialPawnMoves(newState, currentPosition, newPosition);
+        newState.setMoveStatus(getUpdatedMoveStatus(getMoveStatus(), currentPosition));
 
-        changeNewStateBasedOnSpecialPawnMoves(newState, oldPosition, newPosition);
+        if(isCastlingMove(currentPosition, newPosition))
+        {
+            return getNewStateAfterCastling(newState, currentPosition, newPosition);
+        }
 
         newState.setPieceByPosition(pieceToMove, newPosition);
-        newState.setPieceByPosition(null , oldPosition);
+        newState.setPieceByPosition(null , currentPosition);
 
         if(pieceNeedsToBePromoted(newPosition.getX(), pieceToMove))
         {
@@ -124,19 +171,7 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
      */
     public boolean kingIsUnderCheck(Player kingsPlayer) throws KingNotFoundException, InvalidPositionException
     {
-        for(int x = 0; x < getBoard().length; x++)
-        {
-            for (int y = 0; y < getBoard()[0].length; y++)
-            {
-                T piece = getBoard()[x][y];
-                if(piece != null && piece.getPlayer() == kingsPlayer && piece instanceof King)
-                {
-                    return isPositionUnderAttack(new BoardPosition(x, y), kingsPlayer);
-                }
-            }
-        }
-
-        throw new KingNotFoundException("King not found on board");
+        return isPositionUnderAttack(getKingPosition(kingsPlayer), kingsPlayer);
     }
 
     /*
@@ -150,15 +185,7 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
         {
             if(kingIsUnderCheck(getPlayerToMove()))
             {
-                Player winner;
-                if(getPlayerToMove() == Player.WHITE)
-                {
-                    winner = Player.BLACK;
-                }
-                else
-                {
-                    winner = Player.WHITE;
-                }
+                Player winner = Player.getOppositePlayer(getPlayerToMove());
                 return new StateResult(true, winner);
             }
             else
@@ -173,16 +200,116 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
     }
 
     /*
+        Checks if a given position is a valid piece position
+     */
+    public boolean isValidPiecePosition(BoardPosition position)
+    {
+        return isPositionOnBoard(position) && getPieceByPosition(position) != null;
+    }
+
+
+    /*
+        Gets the new state after castling
+     */
+    private ChessState<T> getNewStateAfterCastling(ChessState<T> newState, BoardPosition currentKingPosition, BoardPosition newKingPosition)
+    {
+        BoardPosition currentRookPosition = getRookPositionBeforeCastle(currentKingPosition, newKingPosition);
+        BoardPosition newRookPosition = getRookPositionAfterCastle(currentKingPosition, newKingPosition);
+        T king = getPieceByPosition(currentKingPosition);
+        T rook = getPieceByPosition(currentRookPosition);
+        newState.setPieceByPosition(null, currentKingPosition);
+        newState.setPieceByPosition(null, currentRookPosition);
+        newState.setPieceByPosition(king, newKingPosition);
+        newState.setPieceByPosition(rook, newRookPosition);
+        return newState;
+    }
+
+    /*
+       Gets the rook position for a king's castling move before castling
+    */
+    private BoardPosition getRookPositionBeforeCastle(BoardPosition currentKingPosition, BoardPosition newKingPosition)
+    {
+        T king = getPieceByPosition(currentKingPosition);
+        boolean isKingSideCastling = isMoveCastlingKingSide(currentKingPosition, newKingPosition);
+        BoardPosition rookPosition;
+
+        if(king.getPlayer() == Player.WHITE)
+        {
+            if(isKingSideCastling)
+            {
+                rookPosition = getWhiteKingSideRookStartPosition();
+            }
+            else
+            {
+                rookPosition = getWhiteQueenSideRookStartPosition();
+            }
+        }
+        else
+        {
+            if(isKingSideCastling)
+            {
+                rookPosition = getBlackKingSideRookStartPosition();
+            }
+            else
+            {
+                rookPosition = getBlackQueenSideRookStartPosition();
+            }
+        }
+
+        return rookPosition;
+    }
+
+    /*
+       Gets the rook position for a king's castling move after castling
+    */
+    private BoardPosition getRookPositionAfterCastle(BoardPosition currentKingPosition, BoardPosition newKingPosition)
+    {
+        T king = getPieceByPosition(currentKingPosition);
+        boolean isKingSideCastling = isMoveCastlingKingSide(currentKingPosition, newKingPosition);
+        BoardPosition rookPosition;
+
+        if(king.getPlayer() == Player.WHITE)
+        {
+            if(isKingSideCastling)
+            {
+                rookPosition = Rook.getWhiteKingSideCastlePosition();
+            }
+            else
+            {
+                rookPosition = Rook.getWhiteQueenSideCastlePosition();
+            }
+        }
+        else
+        {
+            if(isKingSideCastling)
+            {
+                rookPosition = Rook.getBlackKingSideCastlePosition();
+            }
+            else
+            {
+                rookPosition = Rook.getBlackQueenSideCastlePosition();
+            }
+        }
+
+        return rookPosition;
+    }
+
+    private boolean isMoveCastlingKingSide(BoardPosition currentKingPosition, BoardPosition newKingPosition)
+    {
+        return newKingPosition.getY() > currentKingPosition.getY();
+    }
+
+    /*
        Changes the new state based on special pawn moves (en-passant and double move)
     */
-    private ChessState<T> changeNewStateBasedOnSpecialPawnMoves(ChessState<T> newState, BoardPosition oldPosition,
+    private ChessState<T> changeNewStateBasedOnSpecialPawnMoves(ChessState<T> newState, BoardPosition currentPosition,
                                                                 BoardPosition newPosition)
     {
-        if(isEnPassantMove(oldPosition, newPosition))
+        if(isEnPassantMove(currentPosition, newPosition))
         {
             newState.setPieceByPosition(null, getPositionOfDoubleMovedPawnLastTurn());
         }
-        else if(isDoublePawnMove(oldPosition, newPosition))
+        else if(isDoublePawnMove(currentPosition, newPosition))
         {
             newState.setPositionOfDoubleMovedPawnLastTurn(newPosition);
         }
@@ -317,6 +444,132 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
     }
 
     /*
+        Gets all castling positions for the king
+     */
+    private Collection<BoardPosition> getCastlingPositions(BoardPosition kingPosition) throws InvalidPositionException
+    {
+        if(!isValidPiecePosition(kingPosition) || !(getPieceByPosition(kingPosition) instanceof King))
+        {
+            throw new InvalidPositionException("Invalid position for the king");
+        }
+
+        Collection<BoardPosition> possiblePositions = new ArrayList<BoardPosition>();
+        King king = (King)getPieceByPosition(kingPosition);
+        if(king.getPlayer() == Player.WHITE && !getMoveStatus().hasWhiteKingMoved())
+        {
+            if(!getMoveStatus().hasWhiteKingSideRookMoved())
+            {
+                possiblePositions.add(new BoardPosition(King.getWhiteKingSideCastlePosition()));
+            }
+
+            if(!getMoveStatus().hasWhiteQueenSideRookMoved())
+            {
+                possiblePositions.add(new BoardPosition(King.getWhiteQueenSideCastlePosition()));
+            }
+        }
+        else if (king.getPlayer() == Player.BLACK && !getMoveStatus().hasBlackKingMoved())
+        {
+            if(!getMoveStatus().hasBlackKingSideRookMoved())
+            {
+                possiblePositions.add(new BoardPosition(King.getBlackKingSideCastlePosition()));
+            }
+
+            if(!getMoveStatus().hasBlackQueenSideRookMoved())
+            {
+                possiblePositions.add(new BoardPosition(King.getBlackQueenSideCastlePosition()));
+            }
+        }
+
+        return possiblePositions;
+    }
+
+    /*
+        Checks if the king can castle with his move
+     */
+    private boolean isValidCastle(BoardPosition currentKingPosition, BoardPosition newKingPosition) throws InvalidPositionException
+    {
+        Player player = getPieceByPosition(currentKingPosition).getPlayer();
+        Collection<BoardPosition> positionsToCheck = getPositionsBetweenTwoOnSameRow(currentKingPosition, newKingPosition);
+        if(areAllPositionsEmpty(positionsToCheck))
+        {
+            positionsToCheck.add(currentKingPosition);
+            positionsToCheck.add(newKingPosition);
+            return !areAnyPositionsUnderAttack(positionsToCheck, player);
+        }
+
+        return false;
+    }
+
+    /*
+        Checks if a move is a castling move
+     */
+    private boolean isCastlingMove(BoardPosition currentPosition, BoardPosition newPosition)
+    {
+        T pieceToMove = getPieceByPosition(currentPosition);
+        T pieceAtNewPosition = getPieceByPosition(newPosition);
+        if(pieceToMove instanceof King)
+        {
+            if(Math.abs(newPosition.getY() - currentPosition.getY()) > 1 ||
+                (pieceAtNewPosition instanceof Rook && pieceAtNewPosition.getPlayer() == pieceToMove.getPlayer()))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /*
+        Checks if all the given positions are empty
+     */
+    private boolean areAllPositionsEmpty(Collection<BoardPosition> positions)
+    {
+        for(BoardPosition position : positions)
+        {
+            if(getPieceByPosition(position) != null)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /*
+        Given two positions, returns all positions between them
+     */
+    private Collection<BoardPosition> getPositionsBetweenTwoOnSameRow(BoardPosition firstPosition, BoardPosition secondPosition) throws InvalidPositionException
+    {
+        if(firstPosition.getX() != secondPosition.getX())
+        {
+            throw new InvalidPositionException("The positions checked must be on the same row");
+        }
+        BoardPosition startPosition, endPosition;
+        if(firstPosition.getY() <= secondPosition.getY())
+        {
+            startPosition = new BoardPosition(firstPosition);
+            endPosition = new BoardPosition(secondPosition);
+        }
+        else
+        {
+            startPosition = new BoardPosition(secondPosition);
+            endPosition = new BoardPosition(firstPosition);
+        }
+
+        Collection<BoardPosition> positions = new ArrayList<BoardPosition>();
+        startPosition.addToPosition(0, 1);
+        while(!(startPosition.equals(endPosition)))
+        {
+            if(!isPositionOnBoard(startPosition))
+            {
+                throw new InvalidPositionException("At least one of the positions between two is outside of the board");
+            }
+            positions.add(new BoardPosition(startPosition));
+            startPosition.addToPosition(0, 1);
+        }
+        return positions;
+    }
+
+    /*
         Given a direction and position piece, returns all possible positions for the piece using this direction
      */
     private Collection<BoardPosition> getPossiblePositionsForDirection(ChessDirectionVector directionVector, BoardPosition piecePosition)
@@ -350,6 +603,26 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
     }
 
     /*
+        Returns the position of the king, for the given player
+     */
+    private BoardPosition getKingPosition(Player kingsPlayer) throws KingNotFoundException
+    {
+        for(int x = 0; x < getBoard().length; x++)
+        {
+            for (int y = 0; y < getBoard()[0].length; y++)
+            {
+                T piece = getBoard()[x][y];
+                if (piece != null && piece.getPlayer() == kingsPlayer && piece instanceof King)
+                {
+                    return new BoardPosition(x, y);
+                }
+            }
+        }
+
+        throw new KingNotFoundException("King not found on board");
+    }
+
+    /*
         Returns a position that represents a position change, from a chess direction vector
      */
     private BoardPosition getPositionChangeFromDirectionVector(ChessDirectionVector directionVector, Player player)
@@ -365,34 +638,110 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
     }
 
     /*
-        Checks if the given position on the board, owned by a given player,
-        is under attack by a piece of a different player
+        Returns all positions for all pieces, for the given player
      */
-    private boolean isPositionUnderAttack(BoardPosition position, Player playerUnderAttack) throws InvalidPositionException
+    private Collection<BoardPosition> getAllPositionsForPlayer(Player player) throws InvalidPositionException
     {
-        if(!(isPositionOnBoard(position)))
-        {
-            throw new IndexOutOfBoundsException("Position is out of bounds");
-        }
-
+        Collection<BoardPosition> possiblePositions = new ArrayList<BoardPosition>();
         for(int x = 0; x < getBoard().length; x++)
         {
-            for(int y = 0; y < getBoard()[0].length; y++)
+            for (int y = 0; y < getBoard()[0].length; y++)
             {
                 T piece = getBoard()[x][y];
-                if (piece != null && piece.getPlayer() != playerUnderAttack)
+                if (piece != null && piece.getPlayer() == player)
                 {
-                    BoardPosition piecePosition = new BoardPosition(x, y);
-                    Collection<BoardPosition> possiblePositions = getPossiblePositionsForPiece(piecePosition);
-                    if(possiblePositions.contains(position))
-                    {
-                        return true;
-                    }
+                    possiblePositions.addAll(getPossiblePositionsForPiece(new BoardPosition(x, y)));
                 }
             }
         }
 
+        return possiblePositions;
+    }
+
+    /*
+        Checks if the given position is under attack by the opponent
+     */
+    private boolean isPositionUnderAttack(BoardPosition position, Player playerUnderAttack) throws InvalidPositionException
+    {
+        Player opponent = Player.getOppositePlayer(playerUnderAttack);
+        Collection<BoardPosition> opponentPossiblePositions = getAllPositionsForPlayer(opponent);
+        return opponentPossiblePositions.contains(position);
+    }
+
+    /*
+        Checks if any of the given positions is under attack by the opponent
+     */
+    private boolean areAnyPositionsUnderAttack(Collection<BoardPosition> positions, Player playerUnderAttack) throws InvalidPositionException
+    {
+        Player opponent = Player.getOppositePlayer(playerUnderAttack);
+        Collection<BoardPosition> opponentPossiblePositions = getAllPositionsForPlayer(opponent);
+        for(BoardPosition position : positions)
+        {
+            if(opponentPossiblePositions.contains(position))
+            {
+                return true;
+            }
+        }
+
         return false;
+    }
+
+    /*
+        Gets the updated move status, based on the move
+     */
+    private ChessPieceMoveStatus getUpdatedMoveStatus(ChessPieceMoveStatus currentStatus, BoardPosition movePosition) throws KingNotFoundException
+    {
+        ChessPieceMoveStatus newMoveStatus = new ChessPieceMoveStatus(currentStatus);
+        T piece = getPieceByPosition(movePosition);
+        if(piece instanceof King)
+        {
+            if(piece.getPlayer() == Player.WHITE)
+            {
+                newMoveStatus.setHasWhiteKingMoved(true);
+            }
+            else
+            {
+                newMoveStatus.setHasBlackKingMoved(true);
+            }
+        }
+        else if(piece instanceof Rook)
+        {
+            BoardPosition kingPosition = getKingPosition(piece.getPlayer());
+            boolean isKingSideRook;
+            if(kingPosition.getY() < movePosition.getY())
+            {
+                isKingSideRook = true;
+            }
+            else
+            {
+                isKingSideRook = false;
+            }
+
+            if(piece.getPlayer() == Player.WHITE)
+            {
+                if(isKingSideRook)
+                {
+                    newMoveStatus.setHasWhiteKingSideRookMoved(true);
+                }
+                else
+                {
+                    newMoveStatus.setHasWhiteQueenSideRookMoved(true);
+                }
+            }
+            else
+            {
+                if(isKingSideRook)
+                {
+                    newMoveStatus.setHasBlackKingSideRookMoved(true);
+                }
+                else
+                {
+                    newMoveStatus.setHasBlackQueenSideRookMoved(true);
+                }
+            }
+        }
+
+        return newMoveStatus;
     }
 
     /*
@@ -436,9 +785,6 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
                 (getBoard()[x][y] == null || getBoard()[x][y].getPlayer() != movingPlayer);
     }
 
-
-    private static final int WHITE_PAWN_START_X_POS = 6;
-    private static final int BLACK_PAWN_START_X_POS = 1;
     /*
         Checks if the pawn at the given position has moved
      */
@@ -462,27 +808,11 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
     }
 
     /*
-        Returns a piece, using it's positions on the board
-     */
-    private T getPieceByPosition(BoardPosition piecePosition)
-    {
-        return getBoard()[piecePosition.getX()][piecePosition.getY()];
-    }
-
-    /*
         Sets the board at the given position to the given piece (can be null)
      */
     private void setPieceByPosition(T piece, BoardPosition position)
     {
         getBoard()[position.getX()][position.getY()] = piece;
-    }
-
-    /*
-        Checks if a given position is a valid piece position
-     */
-    private boolean isValidPiecePosition(BoardPosition position)
-    {
-        return isPositionOnBoard(position) && getPieceByPosition(position) != null;
     }
 
     /*
@@ -496,32 +826,59 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
     /*
         Checks if the change in position was an en passant move
      */
-    private boolean isEnPassantMove(BoardPosition oldPos, BoardPosition newPos)
+    private boolean isEnPassantMove(BoardPosition currentPosition, BoardPosition newPosition)
     {
-        return isValidPawnPosition(oldPos)
-                && getPieceByPosition(newPos) == null
-                && oldPos.getY() != newPos.getY();
+        return isValidPawnPosition(currentPosition)
+                && getPieceByPosition(newPosition) == null
+                && currentPosition.getY() != newPosition.getY();
     }
-
-
-    private static final int PAWN_DOUBLE_MOVE_X_CHANGE = 2;
 
     /*
         Checks if the change in position was a double pawn move
      */
-    private boolean isDoublePawnMove(BoardPosition oldPos, BoardPosition newPos)
+    private boolean isDoublePawnMove(BoardPosition currentPosition, BoardPosition newPosition)
     {
-        return isValidPawnPosition(oldPos)
-                && Math.abs(oldPos.getX() - newPos.getX()) == PAWN_DOUBLE_MOVE_X_CHANGE;
+        return isValidPawnPosition(currentPosition)
+                && Math.abs(currentPosition.getX() - newPosition.getX()) == PAWN_DOUBLE_MOVE_X_CHANGE;
     }
 
-    public BoardPosition getPositionOfDoubleMovedPawnLastTurn()
+    private BoardPosition getPositionOfDoubleMovedPawnLastTurn()
     {
         return positionOfDoubleMovedPawnLastTurn;
     }
 
-    public void setPositionOfDoubleMovedPawnLastTurn(BoardPosition positionOfDoubleMovedPawnLastTurn)
+    private void setPositionOfDoubleMovedPawnLastTurn(BoardPosition positionOfDoubleMovedPawnLastTurn)
     {
         this.positionOfDoubleMovedPawnLastTurn = positionOfDoubleMovedPawnLastTurn;
+    }
+
+    private ChessPieceMoveStatus getMoveStatus()
+    {
+        return moveStatus;
+    }
+
+    private void setMoveStatus(ChessPieceMoveStatus moveStatus)
+    {
+        this.moveStatus = moveStatus;
+    }
+
+    private static BoardPosition getWhiteQueenSideRookStartPosition()
+    {
+        return whiteQueenSideRookStartPosition;
+    }
+
+    private static BoardPosition getWhiteKingSideRookStartPosition()
+    {
+        return whiteKingSideRookStartPosition;
+    }
+
+    private static BoardPosition getBlackQueenSideRookStartPosition()
+    {
+        return blackQueenSideRookStartPosition;
+    }
+
+    private static BoardPosition getBlackKingSideRookStartPosition()
+    {
+        return blackKingSideRookStartPosition;
     }
 }

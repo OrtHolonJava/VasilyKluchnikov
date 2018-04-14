@@ -23,12 +23,7 @@ public abstract class BoardGameState<T extends Piece>
     public BoardGameState(BoardGameState<T> state)
     {
         this.playerToMove = state.playerToMove;
-
-        board = state.board.clone();
-        for(int i = 0; i < board.length; i++)
-        {
-            board[i] = state.board[i].clone(); // Note: The pieces aren't deep cloned
-        }
+        cloneBoard(state);
     }
 
     /*
@@ -55,5 +50,14 @@ public abstract class BoardGameState<T extends Piece>
     public void setPlayerToMove(Player playerToMove)
     {
         this.playerToMove = playerToMove;
+    }
+
+    private void cloneBoard(BoardGameState<T> state)
+    {
+        board = state.getBoard().clone();
+        for(int i = 0; i < board.length; i++)
+        {
+            board[i] = state.board[i].clone(); // Note: The pieces aren't deep cloned
+        }
     }
 }

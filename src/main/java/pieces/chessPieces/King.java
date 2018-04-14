@@ -1,5 +1,6 @@
 package pieces.chessPieces;
 
+import boardgame.BoardPosition;
 import directionVectors.ChessDirectionVector;
 import enums.Player;
 
@@ -27,6 +28,17 @@ public class King extends ChessPiece
         }
     };
 
+    private static BoardPosition whiteKingSideCastlePosition, blackKingSideCastlePosition,
+            whiteQueenSideCastlePosition, blackQueenSideCastlePosition;
+
+    static
+    {
+        whiteKingSideCastlePosition = new BoardPosition(7, 6);
+        whiteQueenSideCastlePosition = new BoardPosition(7, 2);
+        blackKingSideCastlePosition = new BoardPosition(0, 6);
+        blackQueenSideCastlePosition = new BoardPosition(0, 2);
+    }
+
     public King(Player player)
     {
         super(player);
@@ -36,5 +48,25 @@ public class King extends ChessPiece
     public Collection<ChessDirectionVector> getDirectionVectors()
     {
         return chessDirectionVectors;
+    }
+
+    public static BoardPosition getWhiteKingSideCastlePosition()
+    {
+        return whiteKingSideCastlePosition;
+    }
+
+    public static BoardPosition getBlackKingSideCastlePosition()
+    {
+        return blackKingSideCastlePosition;
+    }
+
+    public static BoardPosition getWhiteQueenSideCastlePosition()
+    {
+        return whiteQueenSideCastlePosition;
+    }
+
+    public static BoardPosition getBlackQueenSideCastlePosition()
+    {
+        return blackQueenSideCastlePosition;
     }
 }

@@ -3,6 +3,7 @@ package ui;
 import boardgame.BoardPosition;
 import exceptions.BoardGameException;
 import exceptions.boardExceptions.InvalidInputPositionException;
+import exceptions.boardExceptions.KingNotFoundException;
 import gameStates.ChessState;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -33,15 +34,15 @@ public class GameInputGetter
             return getChessStateInputFromUser(currentState);
         }
 
-        Collection<BoardPosition> unfilteredPossiblePositions = currentState.getPossiblePositionsForPiece(piecePosition);
+        Collection<BoardPosition> uncheckedPossiblePositions = currentState.getPossiblePositionsForPiece(piecePosition);
         List<BoardPosition> possiblePositions = new ArrayList<BoardPosition>();
 
-        for(BoardPosition unfilteredPosition : unfilteredPossiblePositions)
+        for(BoardPosition uncheckedPosition : uncheckedPossiblePositions)
         {
-            ChessState newState = currentState.getStateAfterMove(piecePosition, unfilteredPosition);
-            if(currentState.isMoveLegal(newState, piecePosition, unfilteredPosition))
+            ChessState newState = currentState.getStateAfterMove(piecePosition, uncheckedPosition);
+            if(currentState.isMoveLegal(newState, piecePosition, uncheckedPosition))
             {
-                possiblePositions.add(unfilteredPosition);
+                possiblePositions.add(uncheckedPosition);
             }
         }
 

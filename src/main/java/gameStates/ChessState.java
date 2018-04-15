@@ -10,6 +10,7 @@ import pieces.chessPieces.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by divided on 19.03.2018.
@@ -18,27 +19,25 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
 {
     private static final int WHITE_PAWN_START_X_POS = 6;
     private static final int BLACK_PAWN_START_X_POS = 1;
+    private static final int WHITE_ROOK_START_X_POS = 7;
+    private static final int BLACK_ROOK_START_X_POS = 0;
+    private static final int QUEEN_SIDE_ROOK_START_Y_POS = 0;
+    private static final int KING_SIDE_ROOK_START_Y_POS = 7;
     private static final int PAWN_DOUBLE_MOVE_X_CHANGE = 2;
+
 
     private BoardPosition positionOfDoubleMovedPawnLastTurn;
 
     private ChessPieceMoveStatus moveStatus;
 
-    private static final BoardPosition whiteQueenSideRookStartPosition, whiteKingSideRookStartPosition,
+    private static BoardPosition whiteQueenSideRookStartPosition, whiteKingSideRookStartPosition,
             blackQueenSideRookStartPosition, blackKingSideRookStartPosition;
-
-    static
-    {
-        whiteQueenSideRookStartPosition = new BoardPosition(7, 0);
-        whiteKingSideRookStartPosition = new BoardPosition(7, 7);
-        blackQueenSideRookStartPosition = new BoardPosition(0, 0);
-        blackKingSideRookStartPosition = new BoardPosition(0, 7);
-    }
 
     public ChessState(T[][] board, Player playerToMove)
     {
         super(board, playerToMove);
-        moveStatus = new ChessPieceMoveStatus();
+        setMoveStatus(new ChessPieceMoveStatus());
+        setRookStartPositions();
     }
 
     public ChessState(ChessState<T> state)
@@ -76,14 +75,6 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
         }
 
         return possibleStates;
-    }
-
-    /*
-        Returns a piece, using it's positions on the board
-     */
-    public T getPieceByPosition(BoardPosition piecePosition)
-    {
-        return getBoard()[piecePosition.getX()][piecePosition.getY()];
     }
 
     /*
@@ -200,11 +191,43 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
     }
 
     /*
+        Returns all positions for all pieces, for the given player
+     */
+    public Collection<BoardPosition> getAllPositionsForPlayer(Player player) throws InvalidPositionException
+    {
+        Collection<BoardPosition> possiblePositions = new ArrayList<BoardPosition>();
+        for(int x = 0; x < getBoard().length; x++)
+        {
+            for (int y = 0; y < getBoard()[0].length; y++)
+            {
+                T piece = getBoard()[x][y];
+                if (piece != null && piece.getPlayer() == player)
+                {
+                    possiblePositions.addAll(getPossiblePositionsForPiece(new BoardPosition(x, y)));
+                }
+            }
+        }
+
+        return possiblePositions;
+    }
+
+    /*
         Checks if a given position is a valid piece position
      */
     public boolean isValidPiecePosition(BoardPosition position)
     {
         return isPositionOnBoard(position) && getPieceByPosition(position) != null;
+    }
+
+    /*
+        Sets the starting positions for the rook
+     */
+    protected static void setRookStartPositions()
+    {
+        whiteQueenSideRookStartPosition = new BoardPosition(WHITE_ROOK_START_X_POS, QUEEN_SIDE_ROOK_START_Y_POS);
+        whiteKingSideRookStartPosition = new BoardPosition(WHITE_ROOK_START_X_POS, KING_SIDE_ROOK_START_Y_POS);
+        blackQueenSideRookStartPosition = new BoardPosition(BLACK_ROOK_START_X_POS, QUEEN_SIDE_ROOK_START_Y_POS);
+        blackKingSideRookStartPosition = new BoardPosition(BLACK_ROOK_START_X_POS, KING_SIDE_ROOK_START_Y_POS);
     }
 
 
@@ -638,27 +661,6 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
     }
 
     /*
-        Returns all positions for all pieces, for the given player
-     */
-    private Collection<BoardPosition> getAllPositionsForPlayer(Player player) throws InvalidPositionException
-    {
-        Collection<BoardPosition> possiblePositions = new ArrayList<BoardPosition>();
-        for(int x = 0; x < getBoard().length; x++)
-        {
-            for (int y = 0; y < getBoard()[0].length; y++)
-            {
-                T piece = getBoard()[x][y];
-                if (piece != null && piece.getPlayer() == player)
-                {
-                    possiblePositions.addAll(getPossiblePositionsForPiece(new BoardPosition(x, y)));
-                }
-            }
-        }
-
-        return possiblePositions;
-    }
-
-    /*
         Checks if the given position is under attack by the opponent
      */
     private boolean isPositionUnderAttack(BoardPosition position, Player playerUnderAttack) throws InvalidPositionException
@@ -840,6 +842,14 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
     {
         return isValidPawnPosition(currentPosition)
                 && Math.abs(currentPosition.getX() - newPosition.getX()) == PAWN_DOUBLE_MOVE_X_CHANGE;
+    }
+
+    /*
+        Returns a piece, using it's positions on the board
+     */
+    private T getPieceByPosition(BoardPosition piecePosition)
+    {
+        return getBoard()[piecePosition.getX()][piecePosition.getY()];
     }
 
     private BoardPosition getPositionOfDoubleMovedPawnLastTurn()

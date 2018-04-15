@@ -84,7 +84,7 @@ public class Chess<T extends ChessState> extends BoardGame
     @Override
     protected BoardGameState getStartingState()
     {
-        return ChessBoardUtils.getStateFromFen("1rbqkbnr/ppp1pppp/2n1p3/1N6/P2P1B2/3B3P/1PP2PP1/R2QK2R");
+        return ChessBoardUtils.getStateFromFen(STARTING_FEN);
     }
 
     /*

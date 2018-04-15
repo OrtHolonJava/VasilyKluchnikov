@@ -14,7 +14,7 @@ public class Main
         Chess<ChessState> chess = new Chess<ChessState>();
         try
         {
-            chess.playBotGame(new ChessBot(), 4, Player.WHITE);
+            chess.playBotGame(new ChessBot(), 3, Player.WHITE);
         }
         catch (BoardGameException e)
         {

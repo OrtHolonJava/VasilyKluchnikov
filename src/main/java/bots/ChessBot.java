@@ -9,7 +9,6 @@ import gameStates.BoardGameState;
 import gameStates.ChessState;
 import pieces.Piece;
 import pieces.chessPieces.*;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -82,17 +81,17 @@ public class ChessBot extends BoardGameBot
     @Override
     public BoardGameState findBestNextState(BoardGameState state, int depth) throws BotMoveSearchException
     {
-        MinimaxResult minimaxResult;
         try
         {
-            minimaxResult = super.minimax(state, depth, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+            super.minimax(state, depth, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
         }
         catch (BoardGameException exception)
         {
             exception.printStackTrace();
             throw new BotMoveSearchException("Failed to evaluate the position");
         }
-        return minimaxResult.getBestState();
+
+        return getLastBestMinimaxState();
     }
 
     /*

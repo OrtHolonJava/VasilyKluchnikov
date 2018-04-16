@@ -6,7 +6,7 @@ import exceptions.botExceptions.BotEvaluateException;
 import exceptions.botExceptions.BotMoveSearchException;
 import gameStates.BoardGameState;
 import pieces.Piece;
-
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -14,6 +14,8 @@ import java.util.List;
  */
 public abstract class BoardGameBot
 {
+    private static BoardGameState lastBestMinimaxState;
+
     /*
         Gives an evaluation, a numerical score, to a state
         The evaluation is positive for one player, negative for another
@@ -29,9 +31,9 @@ public abstract class BoardGameBot
         Minimax algorithm used to find the best next state
         Uses alpha-beta pruning optimization
      */
-    public MinimaxResult minimax(BoardGameState state, int depth, double alpha, double beta) throws BoardGameException
+    public double minimax(BoardGameState state, int depth, double alpha, double beta) throws BoardGameException
     {
-        List<BoardGameState> allPossibleStates = (List<BoardGameState>)state.getAllPossibleStates();
+        Collection<BoardGameState> allPossibleStates = state.getAllPossibleStates();
 
         if(depth == 0)
         {
@@ -40,24 +42,23 @@ public abstract class BoardGameBot
             {
                 evaluateValue *= -1;
             }
-            return new MinimaxResult(evaluateValue, null);
+            return evaluateValue;
         }
 
-        double bestValue = Double.NEGATIVE_INFINITY;
+        double bestStateValue = Double.NEGATIVE_INFINITY;
         BoardGameState bestState = null;
         for(BoardGameState nextState : allPossibleStates)
         {
-            MinimaxResult result = minimax(nextState, depth - 1, -1 * beta, -1 * alpha);
-            double value = -1 * result.getBestValue();
-            if(value > bestValue)
+            double currentStateValue = -1 * minimax(nextState, depth - 1, -1 * beta, -1 * alpha);
+            if(currentStateValue > bestStateValue)
             {
-                bestValue = value;
+                bestStateValue = currentStateValue;
                 bestState = nextState;
             }
 
-            if(value > alpha)
+            if(currentStateValue > alpha)
             {
-                alpha = value;
+                alpha = currentStateValue;
             }
             if(alpha >= beta)
             {
@@ -65,6 +66,17 @@ public abstract class BoardGameBot
             }
         }
 
-        return new MinimaxResult(bestValue, bestState);
+        setLastBestMinimaxState(bestState);
+        return bestStateValue;
+    }
+
+    public static BoardGameState getLastBestMinimaxState()
+    {
+        return lastBestMinimaxState;
+    }
+
+    public static void setLastBestMinimaxState(BoardGameState lastBestMinimaxState)
+    {
+        BoardGameBot.lastBestMinimaxState = lastBestMinimaxState;
     }
 }

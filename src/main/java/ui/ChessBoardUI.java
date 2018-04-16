@@ -1,7 +1,7 @@
 package ui;
 
+import boardgame.GameResult;
 import enums.Player;
-import gameStates.StateResult;
 import pieces.chessPieces.*;
 
 import java.util.HashMap;
@@ -10,8 +10,21 @@ import java.util.Map;
 /**
  * Created by divided on 13.04.2018.
  */
-public class BoardUI
+public class ChessBoardUI
 {
+    private static Map<String, Character> pieceNameToCharMap;
+
+    static
+    {
+        pieceNameToCharMap = new HashMap<String, Character>();
+        pieceNameToCharMap.put(Pawn.class.getSimpleName(), 'P');
+        pieceNameToCharMap.put(Knight.class.getSimpleName(), 'N');
+        pieceNameToCharMap.put(Bishop.class.getSimpleName(), 'B');
+        pieceNameToCharMap.put(Rook.class.getSimpleName(), 'R');
+        pieceNameToCharMap.put(Queen.class.getSimpleName(), 'Q');
+        pieceNameToCharMap.put(King.class.getSimpleName(), 'K');
+    }
+
     /*
         Textually outputs the current chess board
     */
@@ -39,7 +52,7 @@ public class BoardUI
     /*
        Outputs the winner of the game accordingly to the game result
     */
-    public static void outputWinner(StateResult gameResult)
+    public static void outputWinner(GameResult gameResult)
     {
         if(gameResult.getWinner() != null)
         {
@@ -49,20 +62,6 @@ public class BoardUI
         {
             System.out.println("Draw!");
         }
-    }
-
-
-    private static Map<String, Character> pieceNameToCharMap;
-
-    static
-    {
-        pieceNameToCharMap = new HashMap<String, Character>();
-        pieceNameToCharMap.put(Pawn.class.getSimpleName(), 'P');
-        pieceNameToCharMap.put(Knight.class.getSimpleName(), 'N');
-        pieceNameToCharMap.put(Bishop.class.getSimpleName(), 'B');
-        pieceNameToCharMap.put(Rook.class.getSimpleName(), 'R');
-        pieceNameToCharMap.put(Queen.class.getSimpleName(), 'Q');
-        pieceNameToCharMap.put(King.class.getSimpleName(), 'K');
     }
 
     /*

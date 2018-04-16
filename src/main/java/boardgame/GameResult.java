@@ -1,16 +1,16 @@
-package gameStates;
+package boardgame;
 
 import enums.Player;
 
 /**
- * Created by divided on 13.04.2018.
+ * Created by divided on 16.04.2018.
  */
-public class StateResult
+public class GameResult
 {
     private boolean gameFinished;
     private Player winner;
 
-    public StateResult(boolean gameFinished, Player winner)
+    public GameResult(boolean gameFinished, Player winner)
     {
         this.gameFinished = gameFinished;
         this.winner = winner;

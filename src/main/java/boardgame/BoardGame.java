@@ -1,10 +1,8 @@
 package boardgame;
 
-import bots.BoardGameBot;
-import enums.Player;
 import exceptions.BoardGameException;
 import gameStates.BoardGameState;
-
+import java.util.ArrayList;
 import java.util.Collection;
 
 /**
@@ -18,29 +16,23 @@ public abstract class BoardGame<T extends BoardGameState>
 
     public BoardGame()
     {
+        setCurrentState(getStartingState());
         currentState = getStartingState();
-        previousStates = null;
-        turnCount = 0;
+        setPreviousStates(new ArrayList<T>());
+        setTurnCount(0);
     }
 
     /*
-        Starts a player vs. player game and manages it
-        Manages turn order, input and stops the game when its finished
+        Given a new state, makes a move by setting the current state to the new one
      */
-    public abstract void playGame() throws BoardGameException;
+    public void makeMove(T newState)
+    {
+        getPreviousStates().add(currentState);
+        setCurrentState(newState);
+        setTurnCount(getTurnCount() + 1);
+    }
 
-    /*
-        Starts a player vs. bot game and manages it
-        Manages turn order, input and stops the game when its finished
-     */
-    public abstract void playBotGame(BoardGameBot bot, int searchDepth, Player player) throws BoardGameException;
-
-    protected abstract T getStartingState();
-
-    /*
-        Gets new state from the player
-     */
-    protected abstract T getNewStateFromPlayer() throws BoardGameException;
+    public abstract GameResult getGameResult() throws BoardGameException;
 
     public T getCurrentState()
     {
@@ -57,17 +49,19 @@ public abstract class BoardGame<T extends BoardGameState>
         return turnCount;
     }
 
-    public void setCurrentState(T currentState)
+    protected abstract T getStartingState();
+
+    private void setCurrentState(T currentState)
     {
         this.currentState = currentState;
     }
 
-    public void setPreviousStates(Collection<T> previousStates)
+    private void setPreviousStates(Collection<T> previousStates)
     {
         this.previousStates = previousStates;
     }
 
-    public void setTurnCount(int turnCount)
+    private void setTurnCount(int turnCount)
     {
         this.turnCount = turnCount;
     }

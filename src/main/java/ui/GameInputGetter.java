@@ -3,7 +3,6 @@ package ui;
 import boardgame.BoardPosition;
 import exceptions.BoardGameException;
 import exceptions.boardExceptions.InvalidInputPositionException;
-import exceptions.boardExceptions.KingNotFoundException;
 import gameStates.ChessState;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -20,7 +19,7 @@ public class GameInputGetter
     /*
         Returns next chess state using player input
      */
-    public ChessState getChessStateInputFromUser(ChessState currentState) throws BoardGameException
+    public static ChessState getChessStateInputFromUser(ChessState currentState) throws BoardGameException
     {
         System.out.println("Enter position of piece to move: ");
         BoardPosition piecePosition;

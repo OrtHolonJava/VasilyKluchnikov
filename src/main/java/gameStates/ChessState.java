@@ -7,10 +7,10 @@ import exceptions.BoardGameException;
 import exceptions.boardExceptions.InvalidPositionException;
 import exceptions.boardExceptions.KingNotFoundException;
 import pieces.chessPieces.*;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Created by divided on 19.03.2018.
@@ -163,31 +163,6 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
     public boolean kingIsUnderCheck(Player kingsPlayer) throws KingNotFoundException, InvalidPositionException
     {
         return isPositionUnderAttack(getKingPosition(kingsPlayer), kingsPlayer);
-    }
-
-    /*
-       Gets the state result
-       State result includes an indication if the game is finished, and the winning player (null if one doesn't exist)
-    */
-    public StateResult getStateResult() throws BoardGameException
-    {
-        Collection<BoardGameState<T>> possibleStates = getAllPossibleStates();
-        if (possibleStates.isEmpty())
-        {
-            if(kingIsUnderCheck(getPlayerToMove()))
-            {
-                Player winner = Player.getOppositePlayer(getPlayerToMove());
-                return new StateResult(true, winner);
-            }
-            else
-            {
-                return new StateResult(true, null);
-            }
-        }
-        else
-        {
-            return new StateResult(false, null);
-        }
     }
 
     /*

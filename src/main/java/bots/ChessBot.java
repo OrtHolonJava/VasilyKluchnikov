@@ -9,6 +9,7 @@ import gameStates.BoardGameState;
 import gameStates.ChessState;
 import pieces.Piece;
 import pieces.chessPieces.*;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,25 +18,25 @@ import java.util.Map;
  */
 public class ChessBot extends BoardGameBot
 {
-    private static final double PAWN_VALUE = 1;
-    private static final double KNIGHT_VALUE = 3.2;
-    private static final double BISHOP_VALUE = 3.3;
-    private static final double ROOK_VALUE = 5;
-    private static final double QUEEN_VALUE = 9;
-    private static final double KING_VALUE = 500;
+    private static final double PAWN_EVALUATE_SCORE = 1;
+    private static final double KNIGHT_EVALUATE_SCORE = 3.2;
+    private static final double BISHOP_EVALUATE_SCORE = 3.3;
+    private static final double ROOK_EVALUATE_SCORE = 5;
+    private static final double QUEEN_EVALUATE_SCORE = 9;
+    private static final double KING_EVALUATE_SCORE = 500;
     private static final double MOVE_BONUS_FACTOR = 0.1;
 
-    private static Map<String, Double> pieceNameToValueMap;
+    private static Map<String, Double> pieceNameToEvaluationMap;
 
     static
     {
-        pieceNameToValueMap = new HashMap<String, Double>();
-        pieceNameToValueMap.put(Pawn.class.getSimpleName(), PAWN_VALUE);
-        pieceNameToValueMap.put(Knight.class.getSimpleName(), KNIGHT_VALUE);
-        pieceNameToValueMap.put(Bishop.class.getSimpleName(), BISHOP_VALUE);
-        pieceNameToValueMap.put(Rook.class.getSimpleName(), ROOK_VALUE);
-        pieceNameToValueMap.put(Queen.class.getSimpleName(), QUEEN_VALUE);
-        pieceNameToValueMap.put(King.class.getSimpleName(), KING_VALUE);
+        pieceNameToEvaluationMap = new HashMap<String, Double>();
+        pieceNameToEvaluationMap.put(Pawn.class.getSimpleName(), PAWN_EVALUATE_SCORE);
+        pieceNameToEvaluationMap.put(Knight.class.getSimpleName(), KNIGHT_EVALUATE_SCORE);
+        pieceNameToEvaluationMap.put(Bishop.class.getSimpleName(), BISHOP_EVALUATE_SCORE);
+        pieceNameToEvaluationMap.put(Rook.class.getSimpleName(), ROOK_EVALUATE_SCORE);
+        pieceNameToEvaluationMap.put(Queen.class.getSimpleName(), QUEEN_EVALUATE_SCORE);
+        pieceNameToEvaluationMap.put(King.class.getSimpleName(), KING_EVALUATE_SCORE);
     }
 
     /*
@@ -45,7 +46,7 @@ public class ChessBot extends BoardGameBot
     @Override
     public double evaluate(BoardGameState<Piece> state) throws BotEvaluateException
     {
-        double whiteScore = 0, blackScore = 0, pieceValue;
+        double whiteScore = 0, blackScore = 0, pieceEvaluateScore;
         Piece piece;
         Piece[][] board = state.getBoard();
         for(int x = 0; x < board.length; x++)
@@ -56,14 +57,14 @@ public class ChessBot extends BoardGameBot
 
                 if (piece != null)
                 {
-                    pieceValue = getPieceValue(piece);
+                    pieceEvaluateScore = getPieceEvaluateScore(piece);
                     if(piece.getPlayer() == Player.WHITE)
                     {
-                        whiteScore += pieceValue;
+                        whiteScore += pieceEvaluateScore;
                     }
                     else
                     {
-                        blackScore += pieceValue;
+                        blackScore += pieceEvaluateScore;
                     }
                 }
             }
@@ -94,7 +95,6 @@ public class ChessBot extends BoardGameBot
         return minimaxResult.getBestState();
     }
 
-
     /*
         Returns bonus for amount of moves for all pieces of the given player
      */
@@ -117,9 +117,9 @@ public class ChessBot extends BoardGameBot
     /*
         Returns a numerical value for a given piece
      */
-    private static double getPieceValue(Piece piece) throws BotEvaluateException
+    private static double getPieceEvaluateScore(Piece piece) throws BotEvaluateException
     {
-        Double value = pieceNameToValueMap.get(piece.getClass().getSimpleName());
+        Double value = pieceNameToEvaluationMap.get(piece.getClass().getSimpleName());
         if(value == null)
         {
             throw new BotEvaluateException("Trying to evaluate an invalid piece");

@@ -31,12 +31,6 @@ public abstract class BoardGameState<T extends Piece>
      */
     public abstract Collection<BoardGameState<T>> getAllPossibleStates() throws BoardGameException;
 
-    /*
-       Gets the state result
-       State result includes an indication if the game is finished, and the winning player (null if one doesn't exist)
-    */
-    public abstract StateResult getStateResult() throws BoardGameException;
-
     public T[][] getBoard()
     {
         return board;

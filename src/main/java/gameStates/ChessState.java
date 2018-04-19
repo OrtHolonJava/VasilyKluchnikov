@@ -52,7 +52,8 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
     @Override
     public Collection<BoardGameState<T>> getAllPossibleStates() throws BoardGameException
     {
-        Collection<BoardGameState<T>> possibleStates = new ArrayList<BoardGameState<T>>();
+        Collection<BoardGameState<T>> possibleStatesWithoutCapture = new ArrayList<BoardGameState<T>>();
+        Collection<BoardGameState<T>> possibleStates = new ArrayList<>();
         for(int x = 0; x < getBoard().length; x++)
         {
             for(int y = 0; y < getBoard()[0].length; y++)
@@ -67,13 +68,20 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
                         ChessState<T> newState = getStateAfterMove(piecePosition, possiblePosition);
                         if(isMoveLegal(newState, piecePosition, possiblePosition))
                         {
-                            possibleStates.add(newState);
+                            if(getPieceByPosition(possiblePosition) != null)
+                            {
+                                possibleStates.add(newState);
+                            }
+                            else
+                            {
+                                possibleStatesWithoutCapture.add(newState);
+                            }
                         }
                     }
                 }
             }
         }
-
+        possibleStates.addAll(possibleStatesWithoutCapture);
         return possibleStates;
     }
 
@@ -603,7 +611,7 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
     /*
         Returns the position of the king, for the given player
      */
-    private BoardPosition getKingPosition(Player kingsPlayer) throws KingNotFoundException
+    public BoardPosition getKingPosition(Player kingsPlayer) throws KingNotFoundException
     {
         for(int x = 0; x < getBoard().length; x++)
         {

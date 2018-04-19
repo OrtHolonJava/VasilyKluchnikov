@@ -5,6 +5,7 @@ import exceptions.BoardGameException;
 import exceptions.botExceptions.BotEvaluateException;
 import exceptions.botExceptions.BotMoveSearchException;
 import gameStates.BoardGameState;
+import gameStates.ChessState;
 import pieces.Piece;
 import java.util.Collection;
 import java.util.List;
@@ -34,15 +35,15 @@ public abstract class BoardGameBot
     public double minimax(BoardGameState state, int depth, double alpha, double beta) throws BoardGameException
     {
         Collection<BoardGameState> allPossibleStates = state.getAllPossibleStates();
-
-        if(depth == 0)
+        if(depth == 0 || state.getAllPossibleStates().isEmpty())
         {
-            double evaluateValue = evaluate(state);
+            double evaluateScore = evaluate(state);
             if(state.getPlayerToMove() == Player.BLACK)
             {
-                evaluateValue *= -1;
+                evaluateScore *= -1;
             }
-            return evaluateValue;
+
+            return evaluateScore;
         }
 
         double bestStateValue = Double.NEGATIVE_INFINITY;

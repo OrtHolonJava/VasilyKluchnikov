@@ -1,6 +1,9 @@
 package ui;
 
 import configuration.OptionsConfigurationReader;
+import ui.panels.ChessGamePanel;
+import ui.panels.MainMenuPanel;
+
 import javax.swing.*;
 import java.awt.event.WindowEvent;
 

@@ -1,4 +1,4 @@
-package ui;
+package ui.panels;
 
 import boardgame.BoardPosition;
 import boardgame.Chess;
@@ -12,6 +12,9 @@ import exceptions.botExceptions.BotEvaluateException;
 import exceptions.botExceptions.BotMoveSearchException;
 import gameStates.ChessState;
 import pieces.chessPieces.*;
+import ui.BoardTile;
+import ui.ChessFrame;
+import ui.buttons.GameButton;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -20,6 +23,7 @@ import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 
 /**
@@ -33,6 +37,9 @@ public class ChessGamePanel extends JPanel
     private static final int NUMBER_OF_BUTTONS = 3;
 
     private static final double BOT_DRAW_ACCEPT_EVALUATION_THRESHOLD = -2;
+
+    private static final double BOARD_WIDTH_RATIO = 0.7;
+    private static final double BOARD_HEIGHT_RATIO = 0.9;
 
     private static final Color SELECTED_HIGHLIGHT_COLOR = new Color(240, 238, 22);
     private static final Color LAST_MOVE_HIGHLIGHT_COLOR = new Color(202, 199, 38);
@@ -52,11 +59,6 @@ public class ChessGamePanel extends JPanel
     private int tileSize;
     private boolean isListeningToUser;
 
-    private JPanel buttonsPanel;
-    private GameButton resignButton;
-    private GameButton offerDrawButton;
-    private GameButton quitButton;
-
     private BoardPosition selectedPosition;
     private Collection<BoardPosition> possiblePositionsForSelection;
 
@@ -69,9 +71,6 @@ public class ChessGamePanel extends JPanel
 
         initializeGameSettings();
         initializeBoard();
-
-        revalidate();
-        repaint();
 
         setListeningToUser(false);
     }
@@ -115,41 +114,44 @@ public class ChessGamePanel extends JPanel
      */
     private void initializeButtons()
     {
-        setButtonsPanel(new JPanel());
-        getButtonsPanel().setBackground(BACKGROUND_COLOR);
-
-        GridLayout buttonLayout = new GridLayout(NUMBER_OF_BUTTONS, 1);
-        buttonLayout.setVgap(getButtonsGap());
-        getButtonsPanel().setLayout(buttonLayout);
-
-        setResignButton(new GameButton("Resign"));
-        getResignButton().addActionListener(new ActionListener() {
+        GameButton resignButton = new GameButton("Resign");
+        resignButton.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
                     askForResign();
             }
         });
-        setOfferDrawButton(new GameButton("Offer Draw"));
-        getOfferDrawButton().addActionListener(new ActionListener() {
+
+        GameButton offerDrawButton = new GameButton("Offer Draw");
+        offerDrawButton.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
                     askForDraw();
             }
         });
-        setQuitButton(new GameButton("Quit"));
-        getQuitButton().addActionListener(new ActionListener() {
+
+        GameButton quitButton = new GameButton("Quit");
+        quitButton.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
                 askToQuitGame();
             }
         });
-        getButtonsPanel().add(getResignButton());
-        getButtonsPanel().add(getOfferDrawButton());
-        getButtonsPanel().add(getQuitButton());
-        add(getButtonsPanel(), BorderLayout.WEST);
+
+        JPanel buttonsPanel = new JPanel();
+        GridLayout buttonLayout = new GridLayout(NUMBER_OF_BUTTONS, 1);
+        buttonLayout.setVgap(getButtonsVerticalGap());
+        buttonsPanel.setLayout(buttonLayout);
+
+        buttonsPanel.add(resignButton);
+        buttonsPanel.add(offerDrawButton);
+        buttonsPanel.add(quitButton);
+
+        buttonsPanel.setBackground(BACKGROUND_COLOR);
+        add(buttonsPanel, BorderLayout.WEST);
     }
 
     private void askToQuitGame()
@@ -220,7 +222,7 @@ public class ChessGamePanel extends JPanel
             {
                 winner = Player.getOppositePlayer(getChessState().getPlayerToMove());
             }
-            
+
             updateGameOnResult(new GameResult(true, winner));
         }
 
@@ -336,7 +338,14 @@ public class ChessGamePanel extends JPanel
         }
     }
 
-    private int getButtonsGap()
+    private Dimension getButtonSize()
+    {
+        int width = (int)getSize().getWidth() / 4;
+        int height = (int)getSize().getHeight() / 8;
+        return new Dimension(width, height);
+    }
+
+    private int getButtonsVerticalGap()
     {
         return (int)getSize().getHeight() / getBoard().length;
     }
@@ -466,8 +475,8 @@ public class ChessGamePanel extends JPanel
     {
         Dimension currentSize = getSize();
 
-        int boardWidth = (int)(currentSize.getWidth() * 0.7);
-        int boardHeight = (int)(currentSize.getHeight() * 0.9);
+        int boardWidth = (int)(currentSize.getWidth() * BOARD_WIDTH_RATIO);
+        int boardHeight = (int)(currentSize.getHeight() * BOARD_HEIGHT_RATIO);
 
         if(boardHeight != boardWidth)
         {
@@ -614,46 +623,6 @@ public class ChessGamePanel extends JPanel
     public void setChessFrameContainer(ChessFrame chessFrameContainer)
     {
         this.chessFrameContainer = chessFrameContainer;
-    }
-
-    private JPanel getButtonsPanel()
-    {
-        return buttonsPanel;
-    }
-
-    private void setButtonsPanel(JPanel buttonsPanel)
-    {
-        this.buttonsPanel = buttonsPanel;
-    }
-
-    private JButton getOfferDrawButton()
-    {
-        return offerDrawButton;
-    }
-
-    private void setOfferDrawButton(GameButton offerDrawButton)
-    {
-        this.offerDrawButton = offerDrawButton;
-    }
-
-    private GameButton getQuitButton()
-    {
-        return quitButton;
-    }
-
-    private void setQuitButton(GameButton quitButton)
-    {
-        this.quitButton = quitButton;
-    }
-
-    private GameButton getResignButton()
-    {
-        return resignButton;
-    }
-
-    private void setResignButton(GameButton resignButton)
-    {
-        this.resignButton = resignButton;
     }
 
     private Player getBotPlayer()

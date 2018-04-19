@@ -1,6 +1,8 @@
-package ui;
+package ui.panels;
 
 import configuration.OptionsConfigurationReader;
+import ui.ChessFrame;
+import ui.buttons.MenuButton;
 
 import javax.swing.*;
 import java.awt.*;
@@ -18,7 +20,6 @@ public class MainMenuPanel extends JPanel
     private static final Color BACKGROUND_COLOR = new Color(122, 145, 182);
 
     private ChessFrame chessFrameContainer;
-    private JPanel buttonsPanel;
 
     public MainMenuPanel(ChessFrame chessFrameContainer)
     {
@@ -31,7 +32,6 @@ public class MainMenuPanel extends JPanel
 
     private void initializeButtons()
     {
-
         Collection<MenuButton> menuButtons = new ArrayList<>();
 
         MenuButton playButton = new MenuButton("Play");
@@ -85,7 +85,6 @@ public class MainMenuPanel extends JPanel
             buttonsPanel.add(button);
         }
 
-        setButtonsPanel(buttonsPanel);
         add(buttonsPanel, BorderLayout.CENTER);
     }
 
@@ -109,15 +108,5 @@ public class MainMenuPanel extends JPanel
         int width = getWidth() / 8;
         int height = getHeight() / 16;
         return new Dimension(width, height);
-    }
-
-    private JPanel getButtonsPanel()
-    {
-        return buttonsPanel;
-    }
-
-    private void setButtonsPanel(JPanel buttonsPanel)
-    {
-        this.buttonsPanel = buttonsPanel;
     }
 }

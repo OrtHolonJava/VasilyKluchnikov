@@ -47,11 +47,6 @@ public class ChessBot extends BoardGameBot
     @Override
     public double evaluate(BoardGameState<Piece> state) throws BotEvaluateException
     {
-        if(hasGameEnded(state))
-        {
-            return getCheckmateEvaluateScore(state);
-        }
-
         double whiteScore = 0, blackScore = 0, pieceEvaluateScore;
         Piece piece;
         Piece[][] board = state.getBoard();
@@ -100,48 +95,6 @@ public class ChessBot extends BoardGameBot
 
         return getLastBestMinimaxState();
     }
-
-    private double getCheckmateEvaluateScore(BoardGameState<Piece> state) throws BotEvaluateException
-    {
-        double evaluateScore;
-        try
-        {
-            if(((ChessState)state).kingIsUnderCheck(state.getPlayerToMove()))
-            {
-                evaluateScore =  CHECKMATE_EVALUATE_SCORE;
-            }
-            else
-            {
-                evaluateScore = 0;
-            }
-        }
-        catch (BoardGameException e)
-        {
-            e.printStackTrace();
-            throw new BotEvaluateException("Failed to check if the king is under a check");
-        }
-
-        if(state.getPlayerToMove() == Player.BLACK)
-        {
-            evaluateScore *= -1;
-        }
-
-        return evaluateScore;
-    }
-
-    private boolean hasGameEnded(BoardGameState<Piece> state) throws BotEvaluateException
-    {
-        try
-        {
-            return state.getAllPossibleStates().isEmpty();
-        }
-        catch (BoardGameException e)
-        {
-            e.printStackTrace();
-            throw new BotEvaluateException("Failed to check for game end");
-        }
-    }
-
 
     /*
         Returns bonus for amount of moves for all pieces of the given player

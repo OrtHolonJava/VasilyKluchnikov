@@ -3,8 +3,9 @@ package ui;
 import boardgame.BoardPosition;
 import boardgame.Chess;
 import boardgame.GameResult;
-import bots.BoardGameBot;
 import bots.ChessBot;
+import configuration.GameConfigurationReader;
+import configuration.OptionsConfigurationReader;
 import enums.Player;
 import exceptions.BoardGameException;
 import exceptions.botExceptions.BotEvaluateException;
@@ -19,10 +20,7 @@ import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Created by divided on 13.04.2018.
@@ -32,18 +30,22 @@ public class ChessGamePanel extends JPanel
     private static final Color BACKGROUND_COLOR = new Color(122, 145, 182);
     private static final String IMAGE_EXTENSION = ".png";
     private static final String IMAGES_PATH = ChessFrame.DIR_PATH + "\\src\\main\\resources\\pieceImages\\";
-    private static final double BOT_DRAW_ACCEPT_EVALUATION_THRESHOLD = -3;
+    private static final int NUMBER_OF_BUTTONS = 3;
+
+    private static final double BOT_DRAW_ACCEPT_EVALUATION_THRESHOLD = -2;
 
     private static final Color SELECTED_HIGHLIGHT_COLOR = new Color(240, 238, 22);
     private static final Color LAST_MOVE_HIGHLIGHT_COLOR = new Color(202, 199, 38);
     private static final Color POSSIBLE_POSITION_HIGHLIGHT_COLOR = new Color(99, 229, 125);
     private static final Color CHECK_HIGHLIGHT_COLOR = Color.RED;
 
+    private ChessFrame chessFrameContainer;
+
     private Chess chessGame;
     private ChessBot chessBot;
     private Player botPlayer;
 
-    private Color firstTileColor, secondTileColor;
+    private Color lightTileColor, darkTileColor;
     private BoardTile tiles[][];
     private JPanel boardPanel;
     private int botDepth;
@@ -58,47 +60,46 @@ public class ChessGamePanel extends JPanel
     private BoardPosition selectedPosition;
     private Collection<BoardPosition> possiblePositionsForSelection;
 
-    private static Map<String, Character> pieceNameToCharMap;
-    static
+    public ChessGamePanel(ChessFrame chessFrameContainer)
     {
-        pieceNameToCharMap = new HashMap<String, Character>();
-        pieceNameToCharMap.put(Pawn.class.getSimpleName(), 'P');
-        pieceNameToCharMap.put(Knight.class.getSimpleName(), 'N');
-        pieceNameToCharMap.put(Bishop.class.getSimpleName(), 'B');
-        pieceNameToCharMap.put(Rook.class.getSimpleName(), 'R');
-        pieceNameToCharMap.put(Queen.class.getSimpleName(), 'Q');
-        pieceNameToCharMap.put(King.class.getSimpleName(), 'K');
-    }
-
-    /*
-        Initializes the game for Player vs Bot game
-     */
-    public ChessGamePanel(Chess chessGame, ChessBot chessBot, Player botPlayer, int botDepth, Dimension panelSize, Color firstTileColor, Color secondTileColor)
-    {
-        setListeningToUser(true);
+        super();
+        setChessFrameContainer(chessFrameContainer);
         setBackground(BACKGROUND_COLOR);
+        setSize(OptionsConfigurationReader.getAppResolution());
 
-        setChessGame(chessGame);
-        setChessBot(chessBot);
-        setBotPlayer(botPlayer);
-        setBotDepth(botDepth);
-        setSize(panelSize);
-        setFirstTileColor(firstTileColor);
-        setSecondTileColor(secondTileColor);
-
+        initializeGameSettings();
         initializeBoard();
+
+        revalidate();
+        repaint();
+
+        setListeningToUser(false);
     }
 
-    /*
-        Initializes the game for Player vs. Player game
-     */
-    public ChessGamePanel(Chess chessGame, Dimension panelSize, Color firstTileColor, Color secondTileColor)
+    public void startGame()
     {
-        this(chessGame, null, null, 0, panelSize, firstTileColor, secondTileColor);
+        if(isBotPlaying() && getChessState().getPlayerToMove() == getBotPlayer())
+        {
+            makeBotMove();
+        }
+        else
+        {
+            setListeningToUser(true);
+        }
+    }
+
+    private void initializeGameSettings()
+    {
+        setChessGame(GameConfigurationReader.getChessGame());
+        setChessBot(GameConfigurationReader.getChessBot());
+        setBotPlayer(GameConfigurationReader.getBotPlayer());
+        setBotDepth(GameConfigurationReader.getBotSearchDepth());
     }
 
     private void initializeBoard()
     {
+        setLightTileColor(OptionsConfigurationReader.getLightTileColor());
+        setDarkTileColor(OptionsConfigurationReader.getDarkTileColor());
         setBoardPanel(new JPanel());
         initializeButtons();
         scaleBoard();
@@ -117,9 +118,8 @@ public class ChessGamePanel extends JPanel
         setButtonsPanel(new JPanel());
         getButtonsPanel().setBackground(BACKGROUND_COLOR);
 
-        GridLayout buttonLayout = new GridLayout(3, 1);
-        int gapSize = (int)getSize().getHeight() / getBoard().length;
-        buttonLayout.setVgap(gapSize);
+        GridLayout buttonLayout = new GridLayout(NUMBER_OF_BUTTONS, 1);
+        buttonLayout.setVgap(getButtonsGap());
         getButtonsPanel().setLayout(buttonLayout);
 
         setResignButton(new GameButton("Resign"));
@@ -127,8 +127,7 @@ public class ChessGamePanel extends JPanel
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                askForResign();
-
+                    askForResign();
             }
         });
         setOfferDrawButton(new GameButton("Offer Draw"));
@@ -136,7 +135,7 @@ public class ChessGamePanel extends JPanel
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                askForDraw();
+                    askForDraw();
             }
         });
         setQuitButton(new GameButton("Quit"));
@@ -153,16 +152,11 @@ public class ChessGamePanel extends JPanel
         add(getButtonsPanel(), BorderLayout.WEST);
     }
 
-    private void quitToMenu()
-    {
-        // TODO: 19.04.2018 Finish this function
-    }
-
     private void askToQuitGame()
     {
-        int dialogResult = JOptionPane.showConfirmDialog (null, "Are you sure you want to draw?","Draw", JOptionPane.YES_NO_OPTION);
+        int dialogResult = JOptionPane.showConfirmDialog (null, "Are you sure you want to quit?","Quit game", JOptionPane.YES_NO_OPTION);
         if(dialogResult == JOptionPane.YES_OPTION){
-            quitToMenu();
+            getChessFrameContainer().openMainMenu();
         }
     }
 
@@ -217,7 +211,17 @@ public class ChessGamePanel extends JPanel
     {
         int dialogResult = JOptionPane.showConfirmDialog (null, "Are you sure you want to resign?","Resign", JOptionPane.YES_NO_OPTION);
         if(dialogResult == JOptionPane.YES_OPTION){
-            updateGameOnResult(new GameResult(true, Player.getOppositePlayer(getChessState().getPlayerToMove())));
+            Player winner;
+            if(isBotPlaying())
+            {
+                winner = getBotPlayer();
+            }
+            else
+            {
+                winner = Player.getOppositePlayer(getChessState().getPlayerToMove());
+            }
+            
+            updateGameOnResult(new GameResult(true, winner));
         }
 
     }
@@ -234,7 +238,7 @@ public class ChessGamePanel extends JPanel
                 tile.addMouseListener(new MouseAdapter() {
                     @Override
                     public void mousePressed(MouseEvent e) {
-                        if(isListeningToUser)
+                        if(isListeningToUser())
                         {
                             tilePressed(tile.getBoardPosition());
 
@@ -246,24 +250,9 @@ public class ChessGamePanel extends JPanel
                         }
                     }
                 });
-                tile.setBackground(getTileColorByPosition(new BoardPosition(x, y)));
+                tile.setBackground(getDefaultTileColorByPosition(new BoardPosition(x, y)));
                 setTileByPosition(tile, x, y);
                 getBoardPanel().add(tile);
-            }
-        }
-    }
-
-    @Override
-    protected void paintComponent(Graphics g)
-    {
-        super.paintComponent(g);
-
-        for(int x = 0; x < getTiles().length; x++)
-        {
-            for(int y = 0; y < getTiles()[0].length; y++)
-            {
-                getTiles()[x][y].revalidate();
-                getTiles()[x][y].repaint();
             }
         }
     }
@@ -275,7 +264,7 @@ public class ChessGamePanel extends JPanel
             try
             {
                 selectedPosition = clickedTilePosition;
-                possiblePositionsForSelection = getAllPossiblePositionsForPiece(selectedPosition);
+                possiblePositionsForSelection = getChessState().getAllValidPositionsForPiece(selectedPosition);
             }
             catch (BoardGameException e)
             {
@@ -307,13 +296,11 @@ public class ChessGamePanel extends JPanel
 
             if(moveWasMade)
             {
+                updateBoard();
                 updateGameOnResult(getGameResult());
                 updateLastMoveHighlight(startMovePosition, clickedTilePosition);
             }
         }
-        revalidate();
-        updateUI();
-        repaint();
     }
 
     private void makeBotMove()
@@ -349,6 +336,11 @@ public class ChessGamePanel extends JPanel
         }
     }
 
+    private int getButtonsGap()
+    {
+        return (int)getSize().getHeight() / getBoard().length;
+    }
+
     private void updateHighlightsOnChangesInStates(ChessPiece[][] oldBoard, ChessPiece[][] newBoard)
     {
         for(int x = 0; x < oldBoard.length; x++)
@@ -377,11 +369,11 @@ public class ChessGamePanel extends JPanel
 
     private void removeTileSelections()
     {
-        getTileByPosition(selectedPosition).setBackground(getTileColorByPosition(selectedPosition));
+        getTileByPosition(selectedPosition).setBackground(getDefaultTileColorByPosition(selectedPosition));
 
         for(BoardPosition position : possiblePositionsForSelection)
         {
-            getTileByPosition(position).setBackground(getTileColorByPosition(position));
+            getTileByPosition(position).setBackground(getDefaultTileColorByPosition(position));
         }
 
         selectedPosition = null;
@@ -397,7 +389,7 @@ public class ChessGamePanel extends JPanel
 
     private GameResult getGameResult()
     {
-        GameResult gameResult = null;
+        GameResult gameResult;
         try
         {
             gameResult = getChessGame().getGameResult();
@@ -420,7 +412,7 @@ public class ChessGamePanel extends JPanel
                 BoardTile tile = getTiles()[x][y];
                 if(tile.getBackground() == colorToReplace)
                 {
-                    tile.setBackground(getTileColorByPosition(new BoardPosition(x, y)));
+                    tile.setBackground(getDefaultTileColorByPosition(new BoardPosition(x, y)));
                 }
             }
         }
@@ -446,15 +438,15 @@ public class ChessGamePanel extends JPanel
         }
     }
 
-    private Color getTileColorByPosition(BoardPosition tilePosition)
+    private Color getDefaultTileColorByPosition(BoardPosition tilePosition)
     {
         if((tilePosition.getX() + tilePosition.getY() + 1) % 2 == 0)
         {
-            return getFirstTileColor();
+            return getLightTileColor();
         }
         else
         {
-            return getSecondTileColor();
+            return getDarkTileColor();
         }
     }
 
@@ -468,27 +460,6 @@ public class ChessGamePanel extends JPanel
     private boolean isBotPlaying()
     {
         return getChessBot() != null;
-    }
-
-    // TODO: 18.04.2018 This entire function is possible a code duplicate from ChessState inside the getPossibleStates function, need to make 1 filter moves function probably
-    private Collection<BoardPosition> getAllPossiblePositionsForPiece(BoardPosition piecePosition) throws BoardGameException
-    {
-        Collection<BoardPosition> possiblePositionsForPiece = new ArrayList<>();
-        ChessPiece piece = getBoard()[piecePosition.getX()][piecePosition.getY()];
-        if(piece != null && piece.getPlayer() == getChessState().getPlayerToMove())
-        {
-            Collection<BoardPosition> uncheckedPositionsForPiece = getChessState().getPossiblePositionsForPiece(piecePosition);
-            for(BoardPosition uncheckedPosition : uncheckedPositionsForPiece)
-            {
-                ChessState newState = getChessState().getStateAfterMove(piecePosition, uncheckedPosition);
-                if(getChessState().isMoveLegal(newState, piecePosition, uncheckedPosition))
-                {
-                    possiblePositionsForPiece.add(uncheckedPosition);
-                }
-            }
-        }
-
-        return possiblePositionsForPiece;
     }
 
     private void scaleBoard()
@@ -556,20 +527,64 @@ public class ChessGamePanel extends JPanel
     /*
       Outputs the winner of the game accordingly to the game result
    */
-    private static void outputWinner(GameResult gameResult)
+    private void outputWinner(GameResult gameResult)
     {
-        String outputString;
+        String winnerOutput;
         if(gameResult.getWinner() == null)
         {
-            outputString = "Game has ended in a draw!";
+            winnerOutput = "Game has ended in a draw!";
         }
         else
         {
-            outputString = "Winner: " + gameResult.getWinner().name();
+            winnerOutput = "Winner: " + gameResult.getWinner().name();
         }
 
-        JOptionPane.showMessageDialog(null, outputString, "Game Result" , JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(null, winnerOutput, "Game Result" , JOptionPane.INFORMATION_MESSAGE);
+
+        askForRematch();
     }
+
+    private void askForRematch()
+    {
+        Object[] options = { "Rematch", "Quit To Menu" };
+        int dialogResult = JOptionPane.showOptionDialog(null,
+                "Would you like to rematch, or to quit to menu?",
+                "Rematch suggestion",
+                JOptionPane.DEFAULT_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                options,
+                options[0]);
+        if(dialogResult == 0)
+        {
+            startRematch();
+        }
+        else
+        {
+            getChessFrameContainer().openMainMenu();
+        }
+    }
+
+    private void startRematch()
+    {
+        initializeGameSettings();
+        startGame();
+        setAllTilesToDefaultColor();
+        updateBoard();
+    }
+
+    private void setAllTilesToDefaultColor()
+    {
+        for(int x = 0; x < getTiles().length; x++)
+        {
+            for(int y = 0; y < getTiles()[0].length; y++)
+            {
+                BoardTile tile = getTiles()[x][y];
+                tile.setBackground(getDefaultTileColorByPosition(new BoardPosition(x, y)));
+            }
+        }
+    }
+
 
     /**
      * scale image
@@ -578,7 +593,7 @@ public class ChessGamePanel extends JPanel
      * @param dHeight height of destination image
      * @return scaled image
      */
-    public static BufferedImage scale(BufferedImage imageToScale, int dWidth, int dHeight) {
+    private static BufferedImage scale(BufferedImage imageToScale, int dWidth, int dHeight) {
         BufferedImage scaledImage = null;
         if (imageToScale != null) {
             scaledImage = new BufferedImage(dWidth, dHeight, imageToScale.getType());
@@ -591,51 +606,14 @@ public class ChessGamePanel extends JPanel
         return scaledImage;
     }
 
-    /*
-        Starts a player vs. player game and manages it
-        Manages turn order, input and stops the game when its finished
-    */
-    public void playGame() throws BoardGameException
+    public ChessFrame getChessFrameContainer()
     {
-        GameResult result = getChessGame().getGameResult();
-
-        while(!result.isGameFinished())
-        {
-            ChessGamePanel.textuallyDisplayBoard((ChessPiece[][]) getChessGame().getCurrentState().getBoard());
-            ChessState newState = GameInputGetter.getChessStateInputFromUser((ChessState) getChessGame().getCurrentState());
-            getChessGame().makeMove(newState);
-            result = getChessGame().getGameResult();
-        }
-        ChessGamePanel.textuallyDisplayBoard((ChessPiece[][]) getChessGame().getCurrentState().getBoard());
-        ChessGamePanel.outputWinner(result);
+        return chessFrameContainer;
     }
 
-    /*
-        Starts a player vs. bot game and manages it
-        Manages turn order, input and stops the game when its finished
-     */
-    public void playBotGame(BoardGameBot bot, int searchDepth, Player player) throws BoardGameException
+    public void setChessFrameContainer(ChessFrame chessFrameContainer)
     {
-        GameResult result = getChessGame().getGameResult();
-
-        while(!result.isGameFinished())
-        {
-            ChessGamePanel.textuallyDisplayBoard((ChessPiece[][]) getChessGame().getCurrentState().getBoard());
-            ChessState newState;
-            if(getChessGame().getCurrentState().getPlayerToMove() == player)
-            {
-                newState = GameInputGetter.getChessStateInputFromUser((ChessState)chessGame.getCurrentState());
-            }
-            else
-            {
-                ChessState currentState = (ChessState)getChessGame().getCurrentState();
-                newState = (ChessState) bot.findBestNextState(currentState, searchDepth);
-            }
-            getChessGame().makeMove(newState);
-            result = getChessGame().getGameResult();
-        }
-        ChessGamePanel.textuallyDisplayBoard((ChessPiece[][]) chessGame.getCurrentState().getBoard());
-        ChessGamePanel.outputWinner(result);
+        this.chessFrameContainer = chessFrameContainer;
     }
 
     private JPanel getButtonsPanel()
@@ -753,24 +731,24 @@ public class ChessGamePanel extends JPanel
         this.tiles = tiles;
     }
 
-    private Color getFirstTileColor()
+    private Color getLightTileColor()
     {
-        return firstTileColor;
+        return lightTileColor;
     }
 
-    private void setFirstTileColor(Color firstTileColor)
+    private void setLightTileColor(Color lightTileColor)
     {
-        this.firstTileColor = firstTileColor;
+        this.lightTileColor = lightTileColor;
     }
 
-    private Color getSecondTileColor()
+    private Color getDarkTileColor()
     {
-        return secondTileColor;
+        return darkTileColor;
     }
 
-    private void setSecondTileColor(Color secondTileColor)
+    private void setDarkTileColor(Color darkTileColor)
     {
-        this.secondTileColor = secondTileColor;
+        this.darkTileColor = darkTileColor;
     }
 
     private void setBoardPanel(JPanel boardPanel)
@@ -796,46 +774,5 @@ public class ChessGamePanel extends JPanel
     private void setBotDepth(int botDepth)
     {
         this.botDepth = botDepth;
-    }
-
-    /*
-                            Textually outputs the current chess board
-                        */
-    public static void textuallyDisplayBoard(ChessPiece[][] board)
-    {
-        System.out.println();
-        for (int j = 0; j < board[0].length; j++)
-        {
-            System.out.printf("%5d", j);
-        }
-        System.out.println();
-
-        for(int x = 0; x < board.length; x++)
-        {
-            for(int y = 0; y < board[0].length; y++)
-            {
-                char charToPrint = getCharRepresentationFromPiece(board[x][y]);
-                System.out.printf("%5s", charToPrint);
-            }
-            System.out.printf("%5d\n", x);
-        }
-        System.out.println();
-    }
-
-    /*
-            Gets char representation for the chess piece
-    */
-    private static char getCharRepresentationFromPiece(ChessPiece piece)
-    {
-        if(piece == null)
-            return '-';
-
-        Character ch = pieceNameToCharMap.get(piece.getClass().getSimpleName());
-
-        if(piece.getPlayer() == Player.BLACK)
-        {
-            ch = Character.toLowerCase(ch);
-        }
-        return ch;
     }
 }

@@ -138,6 +138,26 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
         return possiblePositions;
     }
 
+    public Collection<BoardPosition> getAllValidPositionsForPiece(BoardPosition piecePosition) throws BoardGameException
+    {
+        Collection<BoardPosition> possiblePositionsForPiece = new ArrayList<>();
+        ChessPiece piece = getBoard()[piecePosition.getX()][piecePosition.getY()];
+        if(piece != null && piece.getPlayer() == getPlayerToMove())
+        {
+            Collection<BoardPosition> uncheckedPositionsForPiece = getPossiblePositionsForPiece(piecePosition);
+            for(BoardPosition uncheckedPosition : uncheckedPositionsForPiece)
+            {
+                ChessState newState = getStateAfterMove(piecePosition, uncheckedPosition);
+                if(isMoveLegal(newState, piecePosition, uncheckedPosition))
+                {
+                    possiblePositionsForPiece.add(uncheckedPosition);
+                }
+            }
+        }
+
+        return possiblePositionsForPiece;
+    }
+
     /*
         Gets the new state after making a move on the current state
      */

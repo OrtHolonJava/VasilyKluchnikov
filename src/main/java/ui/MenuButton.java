@@ -6,14 +6,14 @@ import java.awt.*;
 /**
  * Created by divided on 19.04.2018.
  */
-public class GameButton extends JButton
+public class MenuButton extends JButton
 {
-    private static Font FONT = new Font("Serif",Font.BOLD,22);
-    private static Color BACKGROUND_COLOR = new Color(49, 60, 82);
+    private static Font FONT = new Font("Arial", Font.BOLD,22);
+    private static Color BACKGROUND_COLOR = new Color(193, 193, 191);
 
-    public GameButton(String buttonText)
+    public MenuButton(String message)
     {
-        super(buttonText);
+        super(message);
         setFont(FONT);
         setBackground(BACKGROUND_COLOR);
         setForeground(Color.WHITE);

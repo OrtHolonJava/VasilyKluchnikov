@@ -18,7 +18,6 @@ import java.util.Map;
  */
 public class ChessBot extends BoardGameBot
 {
-    private static final double CHECKMATE_EVALUATE_SCORE = 1000;
     private static final double PAWN_EVALUATE_SCORE = 1;
     private static final double KNIGHT_EVALUATE_SCORE = 3.2;
     private static final double BISHOP_EVALUATE_SCORE = 3.3;

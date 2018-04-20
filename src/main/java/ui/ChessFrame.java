@@ -31,18 +31,35 @@ public class ChessFrame extends JFrame
     public void openMainMenu()
     {
         hideAllPanels();
-        MainMenuPanel mainMenuPanel = new MainMenuPanel(this);
-        setMainMenuPanel(mainMenuPanel);
-        add(mainMenuPanel);
+
+        if(getMainMenuPanel() == null)
+        {
+            MainMenuPanel mainMenuPanel = new MainMenuPanel(this);
+            setMainMenuPanel(mainMenuPanel);
+            add(mainMenuPanel);
+        }
+        else
+        {
+            getMainMenuPanel().setVisible(true);
+        }
     }
 
     public void openChessGame()
     {
         hideAllPanels();
-        ChessGamePanel chessGamePanel = new ChessGamePanel(this);
-        setChessGamePanel(chessGamePanel);
-        add(getChessGamePanel());
-        chessGamePanel.startGame();
+
+        if(getChessGamePanel() == null)
+        {
+            ChessGamePanel chessGamePanel = new ChessGamePanel(this);
+            setChessGamePanel(chessGamePanel);
+            add(getChessGamePanel());
+            chessGamePanel.startGame();
+        }
+        else
+        {
+            getChessGamePanel().setVisible(true);
+            getChessGamePanel().startRematch();
+        }
     }
 
     public void openGameOptions()
@@ -65,13 +82,11 @@ public class ChessFrame extends JFrame
         if(getMainMenuPanel() != null)
         {
             getMainMenuPanel().setVisible(false);
-            setMainMenuPanel(null);
         }
 
         if(getChessGamePanel() != null)
         {
             getChessGamePanel().setVisible(false);
-            setMainMenuPanel(null);
         }
     }
 

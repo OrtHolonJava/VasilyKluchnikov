@@ -15,7 +15,7 @@ import java.util.List;
  */
 public abstract class BoardGameBot
 {
-    private static BoardGameState lastBestMinimaxState;
+    private BoardGameState lastBestMinimaxState;
 
     /*
         Gives an evaluation, a numerical score, to a state
@@ -71,13 +71,13 @@ public abstract class BoardGameBot
         return bestStateValue;
     }
 
-    public static BoardGameState getLastBestMinimaxState()
+    public BoardGameState getLastBestMinimaxState()
     {
         return lastBestMinimaxState;
     }
 
-    public static void setLastBestMinimaxState(BoardGameState lastBestMinimaxState)
+    public void setLastBestMinimaxState(BoardGameState lastBestMinimaxState)
     {
-        BoardGameBot.lastBestMinimaxState = lastBestMinimaxState;
+        this.lastBestMinimaxState = lastBestMinimaxState;
     }
 }

@@ -23,7 +23,6 @@ import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 
 /**
@@ -75,6 +74,9 @@ public class ChessGamePanel extends JPanel
         setListeningToUser(false);
     }
 
+    /*
+        Allows the user and the bot to start making moves
+     */
     public void startGame()
     {
         if(isBotPlaying() && getChessState().getPlayerToMove() == getBotPlayer())
@@ -87,12 +89,34 @@ public class ChessGamePanel extends JPanel
         }
     }
 
+    /*
+        Starts a rematch based on the current game settings
+     */
+    public void startRematch()
+    {
+        initializeGameSettings();
+        startGame();
+        setAllTilesToDefaultColor();
+        updateBoard();
+    }
+
     private void initializeGameSettings()
     {
         setChessGame(GameConfigurationReader.getChessGame());
         setChessBot(GameConfigurationReader.getChessBot());
-        setBotPlayer(GameConfigurationReader.getBotPlayer());
-        setBotDepth(GameConfigurationReader.getBotSearchDepth());
+        if(isBotPlaying())
+        {
+            if(GameConfigurationReader.isPlayerColorRandom())
+            {
+                setBotPlayer(Player.getRandomPlayer());
+            }
+            else
+            {
+                Player botPlayer = Player.getOppositePlayer(GameConfigurationReader.getPlayerSide());
+                setBotPlayer(botPlayer);
+                setBotDepth(GameConfigurationReader.getBotSearchDepth());
+            }
+        }
     }
 
     private void initializeBoard()
@@ -225,7 +249,6 @@ public class ChessGamePanel extends JPanel
 
             updateGameOnResult(new GameResult(true, winner));
         }
-
     }
 
     private void initializeTiles()
@@ -473,10 +496,8 @@ public class ChessGamePanel extends JPanel
 
     private void scaleBoard()
     {
-        Dimension currentSize = getSize();
-
-        int boardWidth = (int)(currentSize.getWidth() * BOARD_WIDTH_RATIO);
-        int boardHeight = (int)(currentSize.getHeight() * BOARD_HEIGHT_RATIO);
+        int boardWidth = (int)(getSize().getWidth() * BOARD_WIDTH_RATIO);
+        int boardHeight = (int)(getSize().getHeight() * BOARD_HEIGHT_RATIO);
 
         if(boardHeight != boardWidth)
         {
@@ -529,7 +550,7 @@ public class ChessGamePanel extends JPanel
 
 
         BufferedImage pieceImage = ImageIO.read(new File(imagePath));
-        pieceImage = scale(pieceImage, tileSize, tileSize);
+        pieceImage = scaleImage(pieceImage, tileSize, tileSize);
         tile.getImageLabel().setIcon(new ImageIcon(pieceImage));
     }
 
@@ -574,14 +595,6 @@ public class ChessGamePanel extends JPanel
         }
     }
 
-    private void startRematch()
-    {
-        initializeGameSettings();
-        startGame();
-        setAllTilesToDefaultColor();
-        updateBoard();
-    }
-
     private void setAllTilesToDefaultColor()
     {
         for(int x = 0; x < getTiles().length; x++)
@@ -596,13 +609,13 @@ public class ChessGamePanel extends JPanel
 
 
     /**
-     * scale image
+     * scaleImage image
      *
      * @param dWidth width of destination image
      * @param dHeight height of destination image
      * @return scaled image
      */
-    private static BufferedImage scale(BufferedImage imageToScale, int dWidth, int dHeight) {
+    private static BufferedImage scaleImage(BufferedImage imageToScale, int dWidth, int dHeight) {
         BufferedImage scaledImage = null;
         if (imageToScale != null) {
             scaledImage = new BufferedImage(dWidth, dHeight, imageToScale.getType());
@@ -673,11 +686,6 @@ public class ChessGamePanel extends JPanel
     private BoardTile getTileByPosition(int x, int y)
     {
         return getTiles()[x][y];
-    }
-
-    private void setTileByPosition(BoardTile tilePanel, BoardPosition position)
-    {
-        setTileByPosition(tilePanel, getX(), getY());
     }
 
     private JPanel getBoardPanel()

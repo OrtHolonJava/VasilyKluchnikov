@@ -1,5 +1,7 @@
 package enums;
 
+import java.util.Random;
+
 /**
  * Created by divided on 19.03.2018.
  */
@@ -20,6 +22,23 @@ public enum Player
         else
         {
             return Player.WHITE;
+        }
+    }
+
+    /*
+        Gets a random player
+     */
+    public static Player getRandomPlayer()
+    {
+        Random random = new Random();
+        int randomResult = random.nextInt(2);
+        if(randomResult == 1)
+        {
+            return Player.WHITE;
+        }
+        else
+        {
+            return Player.BLACK;
         }
     }
 }

@@ -97,14 +97,43 @@ public class GameConfigurationReader
         return variantName;
     }
 
+    private static void loadConfig()
+    {
+        InputStream inputStream = null;
+        try
+        {
+            Properties properties = new Properties();
+            inputStream = new FileInputStream(ChessFrame.CONFIG_DIRECTORY_PATH + CONFIG_FILE_NAME);
+            properties.load(inputStream);
+
+            readChessVariantSetting(properties);
+
+            readPlayerSideSettings(properties);
+            readBotSettings(properties);
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+            System.out.println("Error while loading the options configuration");
+        }
+        finally
+        {
+            try
+            {
+                inputStream.close();
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+                System.out.println("Failed to close the input stream");
+            }
+        }
+    }
+
     private static void readChessVariantSetting(Properties properties) throws InvalidPropertiesFormatException
     {
         String chessVariant = properties.getProperty("chessVariant");
-        if(chessVariant.equals("standard"))
-        {
-            setVariantName(chessVariant);
-        }
-        else if(chessVariant.equals("chess960"))
+        if(chessVariant.equals("standard") || chessVariant.equals("chess960"))
         {
             setVariantName(chessVariant);
         }
@@ -176,7 +205,7 @@ public class GameConfigurationReader
         }
     }
 
-    public static void setVariantName(String variantName)
+    private static void setVariantName(String variantName)
     {
         GameConfigurationReader.variantName = variantName;
     }

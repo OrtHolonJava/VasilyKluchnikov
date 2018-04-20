@@ -641,12 +641,12 @@ public class ChessGamePanel extends JPanel
         return scaledImage;
     }
 
-    public ChessFrame getChessFrameContainer()
+    private ChessFrame getChessFrameContainer()
     {
         return chessFrameContainer;
     }
 
-    public void setChessFrameContainer(ChessFrame chessFrameContainer)
+    private void setChessFrameContainer(ChessFrame chessFrameContainer)
     {
         this.chessFrameContainer = chessFrameContainer;
     }

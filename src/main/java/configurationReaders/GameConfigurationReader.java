@@ -26,39 +26,6 @@ public class GameConfigurationReader
         loadConfig();
     }
 
-    private static void loadConfig()
-    {
-        InputStream inputStream = null;
-        try
-        {
-            Properties properties = new Properties();
-            inputStream = new FileInputStream(ChessFrame.CONFIG_DIRECTORY_PATH + CONFIG_FILE_NAME);
-            properties.load(inputStream);
-
-            readChessVariantSetting(properties);
-
-            readPlayerSideSettings(properties);
-            readBotSettings(properties);
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-            System.out.println("Error while loading the options configuration");
-        }
-        finally
-        {
-            try
-            {
-                inputStream.close();
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-                System.out.println("Failed to close the input stream");
-            }
-        }
-    }
-
     public static void updateGameConfig(String variantString, String isPlayerSideRandomString, String playerSideString, String isBotPlayingString, String botSearchDepthString)
     {
         OutputStream outputStream = null;
@@ -78,7 +45,7 @@ public class GameConfigurationReader
         catch (IOException e)
         {
             e.printStackTrace();
-            System.out.println("Error while rewriting the options configuration");
+            System.out.println("Error while rewriting the game configuration");
         }
         finally
         {

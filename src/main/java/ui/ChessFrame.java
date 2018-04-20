@@ -1,11 +1,13 @@
 package ui;
 
-import configurationReaders.OptionsConfigurationReader;
+import configurationReaders.SettingsConfigurationReader;
 import ui.panels.ChessGamePanel;
 import ui.panels.GameOptionsPanel;
 import ui.panels.MainMenuPanel;
+import ui.panels.SettingsPanel;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.WindowEvent;
 
 /**
@@ -19,10 +21,11 @@ public class ChessFrame extends JFrame
     private MainMenuPanel mainMenuPanel;
     private GameOptionsPanel gameOptionsPanel;
     private ChessGamePanel chessGamePanel;
+    private SettingsPanel settingsPanel;
 
     public ChessFrame()
     {
-        setSize(OptionsConfigurationReader.getAppResolution());
+        setSize(SettingsConfigurationReader.getAppResolution());
 
         openMainMenu();
 
@@ -84,6 +87,41 @@ public class ChessFrame extends JFrame
     public void openSettings()
     {
         hideAllPanels();
+        if(getSettingsPanel() == null)
+        {
+            SettingsPanel settingsPanel = new SettingsPanel(this);
+            setSettingsPanel(settingsPanel);
+            add(getSettingsPanel());
+        }
+        else
+        {
+            getSettingsPanel().setVisible(true);
+        }
+    }
+
+    public void updateResolution()
+    {
+        Dimension configResolution = SettingsConfigurationReader.getAppResolution();
+        if(!configResolution.equals(getSize()))
+        {
+            setSize(configResolution);
+            if(getChessGamePanel() != null)
+            {
+                getChessGamePanel().updateSize();
+            }
+            if(getMainMenuPanel() != null)
+            {
+                getMainMenuPanel().updateSize();
+            }
+            if(getGameOptionsPanel() != null)
+            {
+                getGameOptionsPanel().updateSize();
+            }
+            if(getSettingsPanel() != null)
+            {
+                getSettingsPanel().updateSize();
+            }
+        }
     }
 
     public void quitApplication()
@@ -107,6 +145,22 @@ public class ChessFrame extends JFrame
         {
             getChessGamePanel().setVisible(false);
         }
+
+        if(getSettingsPanel() != null)
+        {
+            getSettingsPanel().updateSelections();
+            getSettingsPanel().setVisible(false);
+        }
+    }
+
+    private SettingsPanel getSettingsPanel()
+    {
+        return settingsPanel;
+    }
+
+    private void setSettingsPanel(SettingsPanel settingsPanel)
+    {
+        this.settingsPanel = settingsPanel;
     }
 
     private GameOptionsPanel getGameOptionsPanel()

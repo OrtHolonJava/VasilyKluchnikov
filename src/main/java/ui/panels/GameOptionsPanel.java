@@ -1,7 +1,7 @@
 package ui.panels;
 
 import configurationReaders.GameConfigurationReader;
-import configurationReaders.OptionsConfigurationReader;
+import configurationReaders.SettingsConfigurationReader;
 import enums.Player;
 import ui.ChessFrame;
 import ui.buttons.MenuButton;
@@ -26,7 +26,7 @@ public class GameOptionsPanel extends JPanel
     private static final double ELEMENTS_HORIZONTAL_GAP_RATIO = 0.06;
     private static final double OPTIONS_VERTICAL_GAP_RATIO = 0.03;
 
-    private static final int NUMBER_OF_OPTION_PANEL_ROWS = 6;
+    private static final int NUMBER_OF_OPTION_PANEL_ROWS = 7;
     private static final int NUMBER_OF_OPPONENT_OPTION_ELEMENTS = 3;
     private static final int NUMBER_OF_COLOR_OPTION_ELEMENTS = 2;
     private static final int NUMBER_OF_BOT_DIFFICULTY_OPTION_ELEMENTS = 2;
@@ -35,11 +35,6 @@ public class GameOptionsPanel extends JPanel
 
     private ChessFrame chessFrameContainer;
     private JPanel optionsPanel;
-    private boolean isBotPlaying;
-    private int botSearchDepth;
-    private String chessVariant;
-    private boolean isPlayerSideRandom;
-    private Player playerSide;
 
     private ButtonGroup opponentButtons;
     private JComboBox<String> playerColorBox;
@@ -49,22 +44,16 @@ public class GameOptionsPanel extends JPanel
     public GameOptionsPanel(ChessFrame chessFrameContainer)
     {
         super();
-        setSize(OptionsConfigurationReader.getAppResolution());
+        setSize(SettingsConfigurationReader.getAppResolution());
         setBackground(BACKGROUND_COLOR);
         setChessFrameContainer(chessFrameContainer);
-
-        getOptionsFromConfiguration();
-
         initializeOptionsUI();
     }
 
-    private void getOptionsFromConfiguration()
+    public void updateSize()
     {
-        setIsBotPlaying(GameConfigurationReader.isBotPlaying());
-        setChessVariant(GameConfigurationReader.getVariantName());
-        setIsPlayerSideRandom(GameConfigurationReader.isPlayerSideRandom());
-        setPlayerSide(GameConfigurationReader.getPlayerSide());
-        setBotSearchDepth(GameConfigurationReader.getBotSearchDepth());
+        setSize(SettingsConfigurationReader.getAppResolution());
+        resizeOptionsPanel();
     }
 
     private void initializeOptionsUI()
@@ -120,6 +109,7 @@ public class GameOptionsPanel extends JPanel
         {
             botSearchDepth = BOT_DEPTH_MEDIUM_DIFFICULTY - 1;
         }
+
         GameConfigurationReader.updateGameConfig(selectedVariantString, isPlayerSideRandomString, playerSideString,
                 isBotPlayingString, Integer.toString(botSearchDepth));
 
@@ -146,25 +136,32 @@ public class GameOptionsPanel extends JPanel
         backButton.setFont(TEXT_FONT);
         buttonsPanel.add(backButton);
 
+        getOptionsPanel().add(new JLabel());
         getOptionsPanel().add(buttonsPanel);
     }
 
     private void initializeOptionsPanel()
     {
         JPanel optionsPanel = new JPanel();
+        setOptionsPanel(optionsPanel);
         optionsPanel.setBackground(BACKGROUND_COLOR);
 
-        int width = (int)(getSize().getWidth() * OPTIONS_PANEL_WIDTH_RATIO);
-        int height = (int)(getSize().getHeight() * OPTIONS_PANEL_HEIGHT_RATIO);
-        optionsPanel.setSize(new Dimension(width, height));
-        optionsPanel.setPreferredSize(new Dimension(width, height));
+        resizeOptionsPanel();
 
         GridLayout gridLayout = new GridLayout(NUMBER_OF_OPTION_PANEL_ROWS, 1);
         gridLayout.setVgap(getOptionsVerticalGap());
         optionsPanel.setLayout(gridLayout);
 
-        setOptionsPanel(optionsPanel);
+        getOptionsPanel().add(new JLabel());
         add(optionsPanel);
+    }
+
+    private void resizeOptionsPanel()
+    {
+        int width = (int)(getSize().getWidth() * OPTIONS_PANEL_WIDTH_RATIO);
+        int height = (int)(getSize().getHeight() * OPTIONS_PANEL_HEIGHT_RATIO);
+        getOptionsPanel().setSize(new Dimension(width, height));
+        getOptionsPanel().setPreferredSize(new Dimension(width, height));
     }
 
     private void initializeVariantOptions()
@@ -182,7 +179,7 @@ public class GameOptionsPanel extends JPanel
         JComboBox<String> variantOptionBox = new JComboBox<String>(variantChoices);
         setVariantBox(variantOptionBox);
 
-        if(getChessVariant().equals(standardVariant.toLowerCase()))
+        if(GameConfigurationReader.getVariantName().equals(standardVariant.toLowerCase()))
         {
             variantOptionBox.setSelectedItem(standardVariant);
         }
@@ -215,11 +212,11 @@ public class GameOptionsPanel extends JPanel
         JComboBox<String> botDifficultyOptionBox = new JComboBox<String>(difficultyChoices);
         setBotDifficultyBox(botDifficultyOptionBox);
 
-        if(getBotSearchDepth() == BOT_DEPTH_MEDIUM_DIFFICULTY)
+        if(GameConfigurationReader.getBotSearchDepth() == BOT_DEPTH_MEDIUM_DIFFICULTY)
         {
             botDifficultyOptionBox.setSelectedItem(mediumString);
         }
-        else if (getBotSearchDepth() > BOT_DEPTH_MEDIUM_DIFFICULTY)
+        else if (GameConfigurationReader.getBotSearchDepth()  > BOT_DEPTH_MEDIUM_DIFFICULTY)
         {
             botDifficultyOptionBox.setSelectedItem(hardString);
         }
@@ -249,13 +246,13 @@ public class GameOptionsPanel extends JPanel
         JComboBox<String> colorOptionBox = new JComboBox<String>(colorChoices);
         setPlayerColorBox(colorOptionBox);
 
-        if(isPlayerSideRandom())
+        if(GameConfigurationReader.isPlayerSideRandom())
         {
             colorOptionBox.setSelectedItem(randomString);
         }
         else
         {
-            if(getPlayerSide() == Player.WHITE)
+            if(GameConfigurationReader.getPlayerSide() == Player.WHITE)
             {
                 colorOptionBox.setSelectedItem(whiteString);
             }
@@ -292,7 +289,7 @@ public class GameOptionsPanel extends JPanel
         botOption.setActionCommand(botOption.getText().toLowerCase());
         setOpponentButtonsGroup(buttonGroup);
 
-        if(isBotPlaying())
+        if(GameConfigurationReader.isBotPlaying())
         {
             botOption.setSelected(true);
         }
@@ -369,16 +366,6 @@ public class GameOptionsPanel extends JPanel
         this.variantBox = variantBox;
     }
 
-    private int getBotSearchDepth()
-    {
-        return botSearchDepth;
-    }
-
-    private void setBotSearchDepth(int botSearchDepth)
-    {
-        this.botSearchDepth = botSearchDepth;
-    }
-
     private JPanel getOptionsPanel()
     {
         return optionsPanel;
@@ -388,37 +375,6 @@ public class GameOptionsPanel extends JPanel
     {
         this.optionsPanel = optionsPanel;
     }
-
-    private Player getPlayerSide()
-    {
-        return playerSide;
-    }
-
-    private void setPlayerSide(Player playerSide)
-    {
-        this.playerSide = playerSide;
-    }
-
-    private String getChessVariant()
-    {
-        return chessVariant;
-    }
-
-    private boolean isPlayerSideRandom()
-    {
-        return isPlayerSideRandom;
-    }
-
-    private void setIsPlayerSideRandom(boolean playerSideRandom)
-    {
-        isPlayerSideRandom = playerSideRandom;
-    }
-
-    private void setChessVariant(String chessVariant)
-    {
-        this.chessVariant = chessVariant;
-    }
-
     private ChessFrame getChessFrameContainer()
     {
         return chessFrameContainer;
@@ -429,13 +385,4 @@ public class GameOptionsPanel extends JPanel
         this.chessFrameContainer = chessFrameContainer;
     }
 
-    private boolean isBotPlaying()
-    {
-        return isBotPlaying;
-    }
-
-    private void setIsBotPlaying(boolean botPlaying)
-    {
-        isBotPlaying = botPlaying;
-    }
 }

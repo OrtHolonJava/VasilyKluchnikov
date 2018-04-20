@@ -1,6 +1,6 @@
 package ui.panels;
 
-import configurationReaders.OptionsConfigurationReader;
+import configurationReaders.SettingsConfigurationReader;
 import ui.ChessFrame;
 import ui.buttons.MenuButton;
 
@@ -26,8 +26,13 @@ public class MainMenuPanel extends JPanel
         super();
         setBackground(BACKGROUND_COLOR);
         setChessFrameContainer(chessFrameContainer);
-        setSize(OptionsConfigurationReader.getAppResolution());
+        setSize(SettingsConfigurationReader.getAppResolution());
         initializeButtons();
+    }
+
+    public void updateSize()
+    {
+        setSize(SettingsConfigurationReader.getAppResolution());
     }
 
     private void initializeButtons()

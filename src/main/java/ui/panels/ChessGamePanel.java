@@ -5,7 +5,7 @@ import boardgame.Chess;
 import boardgame.GameResult;
 import bots.ChessBot;
 import configurationReaders.GameConfigurationReader;
-import configurationReaders.OptionsConfigurationReader;
+import configurationReaders.SettingsConfigurationReader;
 import enums.Player;
 import exceptions.BoardGameException;
 import exceptions.botExceptions.BotEvaluateException;
@@ -66,7 +66,7 @@ public class ChessGamePanel extends JPanel
         super();
         setChessFrameContainer(chessFrameContainer);
         setBackground(BACKGROUND_COLOR);
-        setSize(OptionsConfigurationReader.getAppResolution());
+        setSize(SettingsConfigurationReader.getAppResolution());
 
         initializeGameSettings();
         initializeBoard();
@@ -100,6 +100,11 @@ public class ChessGamePanel extends JPanel
         updateBoard();
     }
 
+    public void updateSize()
+    {
+        setSize(SettingsConfigurationReader.getAppResolution());
+    }
+
     private void initializeGameSettings()
     {
         setChessGame(GameConfigurationReader.getChessGame());
@@ -129,8 +134,8 @@ public class ChessGamePanel extends JPanel
 
     private void initializeBoard()
     {
-        setLightTileColor(OptionsConfigurationReader.getLightTileColor());
-        setDarkTileColor(OptionsConfigurationReader.getDarkTileColor());
+        setLightTileColor(SettingsConfigurationReader.getLightTileColor());
+        setDarkTileColor(SettingsConfigurationReader.getDarkTileColor());
         setBoardPanel(new JPanel());
         initializeButtons();
         scaleBoard();

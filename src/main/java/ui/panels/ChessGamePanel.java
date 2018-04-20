@@ -4,8 +4,8 @@ import boardgame.BoardPosition;
 import boardgame.Chess;
 import boardgame.GameResult;
 import bots.ChessBot;
-import configuration.GameConfigurationReader;
-import configuration.OptionsConfigurationReader;
+import configurationReaders.GameConfigurationReader;
+import configurationReaders.OptionsConfigurationReader;
 import enums.Player;
 import exceptions.BoardGameException;
 import exceptions.botExceptions.BotEvaluateException;
@@ -32,7 +32,7 @@ public class ChessGamePanel extends JPanel
 {
     private static final Color BACKGROUND_COLOR = new Color(122, 145, 182);
     private static final String IMAGE_EXTENSION = ".png";
-    private static final String IMAGES_PATH = ChessFrame.DIR_PATH + "\\src\\main\\resources\\pieceImages\\";
+    private static final String IMAGES_PATH = ChessFrame.WORKING_DIRECTORY_PATH + "\\src\\main\\resources\\pieceImages\\";
     private static final int NUMBER_OF_BUTTONS = 3;
 
     private static final double BOT_DRAW_ACCEPT_EVALUATION_THRESHOLD = -2;
@@ -103,10 +103,18 @@ public class ChessGamePanel extends JPanel
     private void initializeGameSettings()
     {
         setChessGame(GameConfigurationReader.getChessGame());
-        setChessBot(GameConfigurationReader.getChessBot());
+        if(GameConfigurationReader.isBotPlaying())
+        {
+            setChessBot(new ChessBot());
+        }
+        else
+        {
+            setChessBot(null);
+        }
+
         if(isBotPlaying())
         {
-            if(GameConfigurationReader.isPlayerColorRandom())
+            if(GameConfigurationReader.isPlayerSideRandom())
             {
                 setBotPlayer(Player.getRandomPlayer());
             }

@@ -1,6 +1,6 @@
 package ui.panels;
 
-import configuration.OptionsConfigurationReader;
+import configurationReaders.OptionsConfigurationReader;
 import ui.ChessFrame;
 import ui.buttons.MenuButton;
 

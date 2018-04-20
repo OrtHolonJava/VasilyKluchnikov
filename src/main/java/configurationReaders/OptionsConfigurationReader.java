@@ -1,4 +1,4 @@
-package configuration;
+package configurationReaders;
 
 import ui.ChessFrame;
 import java.awt.*;
@@ -12,7 +12,7 @@ import java.util.Properties;
  */
 public class OptionsConfigurationReader
 {
-    private static final String CONFIG_PATH = ChessFrame.DIR_PATH + "\\src\\main\\resources\\configurations\\optionsConfig.properties";
+    private static final String CONFIG_FILE_NAME = "optionsConfig.properties";
     private static Dimension resolution;
     private static Color lightColor, darkColor;
 
@@ -23,10 +23,11 @@ public class OptionsConfigurationReader
 
     private static void loadConfig()
     {
+        InputStream inputStream = null;
         try
         {
             Properties properties = new Properties();
-            InputStream inputStream = new FileInputStream(CONFIG_PATH);
+            inputStream = new FileInputStream(ChessFrame.CONFIG_DIRECTORY_PATH + CONFIG_FILE_NAME);
             properties.load(inputStream);
 
             int width = Integer.parseInt(properties.getProperty("frameWidth"));
@@ -46,7 +47,19 @@ public class OptionsConfigurationReader
         catch (IOException e)
         {
             e.printStackTrace();
-            System.out.println("Error while loading the options configuration");
+            System.out.println("Error while loading the options configurationReaders");
+        }
+        finally
+        {
+            try
+            {
+                inputStream.close();
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+                System.out.println("Failed to close the input stream");
+            }
         }
     }
 

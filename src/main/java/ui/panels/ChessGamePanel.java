@@ -12,7 +12,7 @@ import exceptions.botExceptions.BotEvaluateException;
 import exceptions.botExceptions.BotMoveSearchException;
 import gameStates.ChessState;
 import pieces.chessPieces.ChessPiece;
-import ui.BoardTile;
+import ui.BoardTilePanel;
 import ui.ChessFrame;
 import ui.buttons.GameButton;
 import utils.ImageUtils;
@@ -40,6 +40,7 @@ public class ChessGamePanel extends JPanel
     private static final int NUMBER_OF_BUTTONS = 3;
 
     private static final double BOT_DRAW_ACCEPT_EVALUATION_THRESHOLD = -2;
+    private static final int DELAY_FOR_BOARD_UPDATE_IN_MS = 500;
 
     private static final double BOARD_WIDTH_RATIO = 0.7;
     private static final double BOARD_HEIGHT_RATIO = 0.9;
@@ -56,7 +57,7 @@ public class ChessGamePanel extends JPanel
     private Player botPlayer;
 
     private Color lightTileColor, darkTileColor;
-    private BoardTile tiles[][];
+    private BoardTilePanel tiles[][];
     private JPanel boardPanel;
     private int botDepth;
     private int tileSize;
@@ -85,7 +86,7 @@ public class ChessGamePanel extends JPanel
     {
         if(isBotPlaying() && getChessState().getPlayerToMove() == getBotPlayer())
         {
-            makeBotMove();
+            waitThenMakeBotMove();
         }
         else
         {
@@ -101,7 +102,7 @@ public class ChessGamePanel extends JPanel
         initializeGameSettings();
         startGame();
         setAllTilesToDefaultColor();
-        updateBoard();
+        updateBoardUI();
     }
 
     /*
@@ -157,7 +158,7 @@ public class ChessGamePanel extends JPanel
         getBoardPanel().setBackground(BACKGROUND_COLOR);
         add(getBoardPanel(), BorderLayout.CENTER);
         initializeTiles();
-        updateBoard();
+        updateBoardUI();
     }
 
     /*
@@ -202,7 +203,7 @@ public class ChessGamePanel extends JPanel
         buttonsPanel.add(quitButton);
 
         buttonsPanel.setBackground(BACKGROUND_COLOR);
-        add(buttonsPanel, BorderLayout.WEST);
+        add(buttonsPanel);
     }
 
     /*
@@ -296,12 +297,12 @@ public class ChessGamePanel extends JPanel
      */
     private void initializeTiles()
     {
-        setTiles(new BoardTile[getBoard().length][getBoard()[0].length]);
+        setTiles(new BoardTilePanel[getBoard().length][getBoard()[0].length]);
         for(int x = 0; x < getBoard().length; x++)
         {
             for(int y = 0; y < getBoard()[0].length; y++)
             {
-                BoardTile tile = new BoardTile(new BoardPosition(x, y));
+                BoardTilePanel tile = new BoardTilePanel(new BoardPosition(x, y));
 
                 tile.addMouseListener(new MouseAdapter() {
                     @Override
@@ -309,12 +310,6 @@ public class ChessGamePanel extends JPanel
                         if(isListeningToUser())
                         {
                             tilePressed(tile.getBoardPosition());
-
-                            if(isBotPlaying() && getChessState().getPlayerToMove() == getBotPlayer())
-                            {
-                                makeBotMove();
-                            }
-
                         }
                     }
                 });
@@ -368,9 +363,47 @@ public class ChessGamePanel extends JPanel
 
             if(moveWasMade)
             {
-                updateBoard();
+                updateBoardUI();
                 updateGameOnResult(getGameResult());
                 updateLastMoveHighlight(startMovePosition, clickedTilePosition);
+                updateAllPanels();
+
+                if(isBotPlaying() && getChessState().getPlayerToMove() == getBotPlayer())
+                {
+                    waitThenMakeBotMove();
+                }
+            }
+        }
+    }
+
+    /*
+        Waits a bit for the board to update, then makes a bot move
+     */
+    private void waitThenMakeBotMove()
+    {
+        ActionListener botMoveLaunch = new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
+                makeBotMove();
+            }
+        };
+        Timer timer = new Timer(DELAY_FOR_BOARD_UPDATE_IN_MS, botMoveLaunch);
+        timer.setRepeats(false);
+        timer.start();
+    }
+
+    private void updateAllPanels()
+    {
+        revalidate();
+        repaint();
+        getBoardPanel().revalidate();
+        getBoardPanel().repaint();
+        for(int x = 0; x < getTiles().length; x++)
+        {
+            for (int y = 0; y < getTiles()[0].length; y++)
+            {
+                BoardTilePanel tile = getTiles()[x][y];
+                tile.revalidate();
+                tile.repaint();
             }
         }
     }
@@ -394,10 +427,10 @@ public class ChessGamePanel extends JPanel
         }
         getChessGame().makeMove(newState);
 
-        updateBoard();
+        updateBoardUI();
         updateKingCheckHighlight();
 
-        //updateHighlightsOnChangesInStates((ChessPiece[][]) currentState.getBoard(), (ChessPiece[][])newState.getBoard());
+        updateHighlightsOnChangesOnBoards((ChessPiece[][]) currentState.getBoard(), (ChessPiece[][])newState.getBoard());
         updateGameOnResult(getGameResult());
         setListeningToUser(true);
     }
@@ -415,16 +448,6 @@ public class ChessGamePanel extends JPanel
     }
 
     /*
-        Gets the size of the buttons
-     */
-    private Dimension getButtonSize()
-    {
-        int width = (int)getSize().getWidth() / 4;
-        int height = (int)getSize().getHeight() / 8;
-        return new Dimension(width, height);
-    }
-
-    /*
         Gets the vertical gap between the buttons
      */
     private int getButtonsVerticalGap()
@@ -437,14 +460,19 @@ public class ChessGamePanel extends JPanel
      */
     private void updateHighlightsOnChangesOnBoards(ChessPiece[][] oldBoard, ChessPiece[][] newBoard)
     {
+        replaceSpecificTileColorToDefault(LAST_MOVE_HIGHLIGHT_COLOR);
         for(int x = 0; x < oldBoard.length; x++)
         {
             for(int y = 0; y < oldBoard[0].length; y++)
             {
-                BoardTile tile = getTileByPosition(x, y);
+                BoardTilePanel tile = getTileByPosition(x, y);
                 ChessPiece oldPiece = oldBoard[x][y], newPiece = newBoard[x][y];
-                if((oldPiece == null && newPiece != null) || (oldPiece != null && newPiece == null)
-                        || !oldBoard[x][y].equals(newBoard[x][y]))
+                if((oldPiece == null && newPiece != null) || (oldPiece != null && newPiece == null))
+                {
+                    tile.setBackground(LAST_MOVE_HIGHLIGHT_COLOR);
+                }
+
+                if(oldPiece != null && newPiece != null && !oldPiece.equals(newPiece))
                 {
                     tile.setBackground(LAST_MOVE_HIGHLIGHT_COLOR);
                 }
@@ -518,7 +546,7 @@ public class ChessGamePanel extends JPanel
         {
             for(int y = 0; y < getTiles()[0].length; y++)
             {
-                BoardTile tile = getTiles()[x][y];
+                BoardTilePanel tile = getTiles()[x][y];
                 if(tile.getBackground() == colorToReplace)
                 {
                     tile.setBackground(getDefaultTileColorByPosition(new BoardPosition(x, y)));
@@ -604,14 +632,14 @@ public class ChessGamePanel extends JPanel
     /*
         Updates the board UI, with the current representation of the chess board inside the chess game
      */
-    private void updateBoard()
+    private void updateBoardUI()
     {
         for(int x = 0; x < getBoard().length; x++)
         {
             for(int y = 0; y < getBoard()[0].length; y++)
             {
                 ChessPiece piece = getBoard()[x][y];
-                BoardTile tile = getTileByPosition(x, y);
+                BoardTilePanel tile = getTileByPosition(x, y);
                 if(piece != tile.getPiece())
                 {
                     try
@@ -632,7 +660,7 @@ public class ChessGamePanel extends JPanel
     /*
         Updates the given tile with the given image of a piece
      */
-    private void updateTileWithPiece(ChessPiece piece, BoardTile tile) throws IOException
+    private void updateTileWithPiece(ChessPiece piece, BoardTilePanel tile) throws IOException
     {
         tile.setPiece(piece);
 
@@ -706,7 +734,7 @@ public class ChessGamePanel extends JPanel
         {
             for(int y = 0; y < getTiles()[0].length; y++)
             {
-                BoardTile tile = getTiles()[x][y];
+                BoardTilePanel tile = getTiles()[x][y];
                 tile.setBackground(getDefaultTileColorByPosition(new BoardPosition(x, y)));
             }
         }
@@ -762,12 +790,12 @@ public class ChessGamePanel extends JPanel
         this.chessGame = chessGame;
     }
 
-    private BoardTile getTileByPosition(BoardPosition position)
+    private BoardTilePanel getTileByPosition(BoardPosition position)
     {
         return getTileByPosition(position.getX(), position.getY());
     }
 
-    private BoardTile getTileByPosition(int x, int y)
+    private BoardTilePanel getTileByPosition(int x, int y)
     {
         return getTiles()[x][y];
     }
@@ -777,17 +805,17 @@ public class ChessGamePanel extends JPanel
         return boardPanel;
     }
 
-    private void setTileByPosition(BoardTile tilePanel, int x, int y)
+    private void setTileByPosition(BoardTilePanel tilePanel, int x, int y)
     {
         getTiles()[x][y] = tilePanel;
     }
 
-    private BoardTile[][] getTiles()
+    private BoardTilePanel[][] getTiles()
     {
         return tiles;
     }
 
-    private void setTiles(BoardTile[][] tiles)
+    private void setTiles(BoardTilePanel[][] tiles)
     {
         this.tiles = tiles;
     }

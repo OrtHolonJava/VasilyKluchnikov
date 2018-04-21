@@ -9,13 +9,13 @@ import java.awt.*;
 /**
  * Created by divided on 17.04.2018.
  */
-public class BoardTile extends JPanel
+public class BoardTilePanel extends JPanel
 {
     private BoardPosition boardPosition;
     private ChessPiece piece;
     private JLabel imageLabel;
     
-    public BoardTile(BoardPosition boardPosition)
+    public BoardTilePanel(BoardPosition boardPosition)
     {
         super();
         setBoardPosition(boardPosition);

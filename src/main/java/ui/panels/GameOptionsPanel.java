@@ -16,7 +16,7 @@ import java.awt.event.ActionListener;
  */
 public class GameOptionsPanel extends JPanel
 {
-    private static final Color BACKGROUND_COLOR = new Color(122, 145, 182);
+    private static final Color BACKGROUND_COLOR = MainMenuPanel.BACKGROUND_COLOR;
     private static final Font TEXT_FONT = new Font("Tahoma", Font.BOLD, 24);
 
     private static final int BOT_DEPTH_MEDIUM_DIFFICULTY = 3;
@@ -47,16 +47,22 @@ public class GameOptionsPanel extends JPanel
         setSize(SettingsConfigurationReader.getAppResolution());
         setBackground(BACKGROUND_COLOR);
         setChessFrameContainer(chessFrameContainer);
-        initializeOptionsUI();
+        initializeGameOptionsUI();
     }
 
+    /*
+       Updates the size of the panel based on current resolution setting
+    */
     public void updateSize()
     {
         setSize(SettingsConfigurationReader.getAppResolution());
         resizeOptionsPanel();
     }
 
-    private void initializeOptionsUI()
+    /*
+        Initializes the whole game options UI
+     */
+    private void initializeGameOptionsUI()
     {
         initializeOptionsPanel();
         initializeOpponentOptions();
@@ -66,6 +72,9 @@ public class GameOptionsPanel extends JPanel
         initializeButtons();
     }
 
+    /*
+        Updates the game configuration based on the selected settings by the user
+     */
     private void updateGameConfig()
     {
         int botSearchDepth;
@@ -115,6 +124,9 @@ public class GameOptionsPanel extends JPanel
 
     }
 
+    /*
+        Initializes the UI of the bottom buttons
+     */
     private void initializeButtons()
     {
         JPanel buttonsPanel = new JPanel();
@@ -140,6 +152,9 @@ public class GameOptionsPanel extends JPanel
         getOptionsPanel().add(buttonsPanel);
     }
 
+    /*
+        Initializes the main panel which holds all the options (and the buttons)
+     */
     private void initializeOptionsPanel()
     {
         JPanel optionsPanel = new JPanel();
@@ -156,6 +171,9 @@ public class GameOptionsPanel extends JPanel
         add(optionsPanel);
     }
 
+    /*
+        Resizes the main options panel based on the current panel size
+     */
     private void resizeOptionsPanel()
     {
         int width = (int)(getSize().getWidth() * OPTIONS_PANEL_WIDTH_RATIO);
@@ -164,6 +182,9 @@ public class GameOptionsPanel extends JPanel
         getOptionsPanel().setPreferredSize(new Dimension(width, height));
     }
 
+    /*
+        Initializes the variant options UI
+     */
     private void initializeVariantOptions()
     {
         JPanel variantPanel = new JPanel();
@@ -198,6 +219,9 @@ public class GameOptionsPanel extends JPanel
         getOptionsPanel().add(variantPanel);
     }
 
+    /*
+        Initializes the bot difficulty options UI
+     */
     private void initializeBotDifficultyOptions()
     {
         JPanel botDifficultyPanel = new JPanel();
@@ -233,6 +257,9 @@ public class GameOptionsPanel extends JPanel
         getOptionsPanel().add(botDifficultyPanel);
     }
 
+    /*
+        Initializes the player color options UI
+     */
     private void initializePlayerColorOptions()
     {
         JPanel playerColorPanel = new JPanel();
@@ -272,6 +299,9 @@ public class GameOptionsPanel extends JPanel
         getOptionsPanel().add(playerColorPanel);
     }
 
+    /*
+        Initializes the opponent options UI
+     */
     private void initializeOpponentOptions()
     {
         JPanel opponentSettingsPanel = new JPanel();

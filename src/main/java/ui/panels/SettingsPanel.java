@@ -15,10 +15,10 @@ import java.awt.event.ActionListener;
  */
 public class SettingsPanel extends JPanel
 {
-    private static final Color BACKGROUND_COLOR = new Color(122, 145, 182);
+    private static final Color BACKGROUND_COLOR = MainMenuPanel.BACKGROUND_COLOR;
     private static final Font TEXT_FONT = new Font("Tahoma", Font.BOLD, 24);
 
-    private static final String[] POSSIBLE_RESOLUTIONS = new String [] {"800x600", "960x720", "1024x768", "1280x720", "1280x960", "1600x900", "1920x1080"};
+    private static final String[] POSSIBLE_RESOLUTIONS = new String [] {"960x720", "1024x768", "1280x720", "1280x960", "1600x900", "1920x1080"};
 
     private static final double OPTIONS_PANEL_WIDTH_RATIO = 0.8;
     private static final double OPTIONS_PANEL_HEIGHT_RATIO = 0.8;
@@ -43,12 +43,18 @@ public class SettingsPanel extends JPanel
         initializeSettingsUI();
     }
 
+    /*
+       Updates the size of the panel based on current resolution setting
+    */
     public void updateSize()
     {
         setSize(SettingsConfigurationReader.getAppResolution());
         resizeOptionsPanel();
     }
 
+    /*
+        Updates current resolution and color selections, based on the settings config
+     */
     public void updateSelections()
     {
         String currentResolutionString = dimensionToString(SettingsConfigurationReader.getAppResolution());
@@ -64,6 +70,9 @@ public class SettingsPanel extends JPanel
         getDarkColorButton().setBackground(SettingsConfigurationReader.getDarkTileColor());
     }
 
+    /*
+        Initializes settings UI
+     */
     private void initializeSettingsUI()
     {
         initializeOptionsPanel();
@@ -73,6 +82,9 @@ public class SettingsPanel extends JPanel
         updateSelections();
     }
 
+    /*
+        Initializes the buttons UI
+     */
     private void initializeButtons()
     {
         JPanel buttonsPanel = new JPanel();
@@ -129,12 +141,18 @@ public class SettingsPanel extends JPanel
         getOptionsPanel().add(buttonsPanel);
     }
 
+    /*
+        Checks by asking the user if he wants to apply settings
+     */
     private boolean userWantsToApplySettings()
     {
         int dialogResult = JOptionPane.showConfirmDialog (null, "Changes were made. Do you want to apply them?","Apply changes?", JOptionPane.YES_NO_OPTION);
         return dialogResult == JOptionPane.YES_OPTION;
     }
 
+    /*
+        Updates the settings config based on current selections
+     */
     private void updateSettingsConfig()
     {
         Dimension resolution = getDimensionFromResolutionString(getResolutionSettingBox().getSelectedItem().toString());
@@ -149,6 +167,9 @@ public class SettingsPanel extends JPanel
         SettingsConfigurationReader.updateSettingsConfig(frameWidth, frameHeight, lightR, lightG, lightB, darkR, darkG, darkB);
     }
 
+    /*
+        Initializes the tile color settings UI
+     */
     private void initializeTileColorSettings()
     {
         GridLayout layout = new GridLayout(1, NUMBER_OF_RESOLUTION_SETTING_ELEMENTS);
@@ -180,6 +201,9 @@ public class SettingsPanel extends JPanel
         getOptionsPanel().add(darkColorPanel);
     }
 
+    /*
+        Initializes the resolution settings UI
+     */
     private void initializeResolutionSettings()
     {
         JPanel resolutionPanel = new JPanel();
@@ -211,6 +235,9 @@ public class SettingsPanel extends JPanel
         getOptionsPanel().add(resolutionPanel);
     }
 
+    /*
+        Initializes the main option panel which holds all of the settings (and the buttons)
+     */
     private void initializeOptionsPanel()
     {
         JPanel optionsPanel = new JPanel();
@@ -227,6 +254,9 @@ public class SettingsPanel extends JPanel
         add(optionsPanel);
     }
 
+    /*
+        Resizes the main options panel
+     */
     private void resizeOptionsPanel()
     {
         int width = (int)(getSize().getWidth() * OPTIONS_PANEL_WIDTH_RATIO);
@@ -235,6 +265,9 @@ public class SettingsPanel extends JPanel
         optionsPanel.setPreferredSize(new Dimension(width, height));
     }
 
+    /*
+        Checks whether the user has changed any of the settings
+     */
     private boolean hasUserChangedSettings()
     {
         Dimension selectedResolution = getDimensionFromResolutionString(getResolutionSettingBox().getSelectedItem().toString());
@@ -243,6 +276,9 @@ public class SettingsPanel extends JPanel
                 !getDarkColorButton().getBackground().equals(SettingsConfigurationReader.getDarkTileColor());
     }
 
+    /*
+        Converts resolution string (of the form WIDTHxHEIGHT) to the corresponding dimension/size
+     */
     private Dimension getDimensionFromResolutionString(String resolutionString)
     {
         int indexOfSeparator = resolutionString.indexOf('x');
@@ -262,6 +298,9 @@ public class SettingsPanel extends JPanel
         return new Dimension(width, height);
     }
 
+    /*
+        Converts dimension/size to a resolution string (of the form WIDTHxHEIGHT)
+     */
     private String dimensionToString(Dimension dimension)
     {
         return (int)dimension.getWidth() + "x" + (int)dimension.getHeight();

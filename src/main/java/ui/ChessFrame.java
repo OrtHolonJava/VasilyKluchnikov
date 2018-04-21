@@ -34,6 +34,9 @@ public class ChessFrame extends JFrame
         setVisible(true);
     }
 
+    /*
+        Opens the main menu panel
+     */
     public void openMainMenu()
     {
         hideAllPanels();
@@ -50,6 +53,9 @@ public class ChessFrame extends JFrame
         }
     }
 
+    /*
+        Opens the chess game panel
+     */
     public void openChessGame()
     {
         hideAllPanels();
@@ -68,6 +74,9 @@ public class ChessFrame extends JFrame
         }
     }
 
+    /*
+        Opens the game options panel
+     */
     public void openGameOptions()
     {
         hideAllPanels();
@@ -84,6 +93,9 @@ public class ChessFrame extends JFrame
         }
     }
 
+    /*
+        Opens the settings panel
+     */
     public void openSettings()
     {
         hideAllPanels();
@@ -99,6 +111,9 @@ public class ChessFrame extends JFrame
         }
     }
 
+    /*
+        Updates the size of the frame based on new resolution, and all other panels too
+     */
     public void updateResolution()
     {
         Dimension configResolution = SettingsConfigurationReader.getAppResolution();
@@ -124,11 +139,17 @@ public class ChessFrame extends JFrame
         }
     }
 
+    /*
+        Quits the application
+     */
     public void quitApplication()
     {
         dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
     }
 
+    /*
+        Hides all panels
+     */
     private void hideAllPanels()
     {
         if(getMainMenuPanel() != null)

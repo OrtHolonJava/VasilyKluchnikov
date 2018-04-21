@@ -38,7 +38,7 @@ public class BoardTile extends JPanel
         return imageLabel;
     }
 
-    public void setImageLabel(JLabel imageLabel)
+    private void setImageLabel(JLabel imageLabel)
     {
         this.imageLabel = imageLabel;
         add(imageLabel, BorderLayout.CENTER);
@@ -49,7 +49,7 @@ public class BoardTile extends JPanel
         return boardPosition;
     }
 
-    public void setBoardPosition(BoardPosition boardPosition)
+    private void setBoardPosition(BoardPosition boardPosition)
     {
         this.boardPosition = boardPosition;
     }

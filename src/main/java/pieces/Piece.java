@@ -2,6 +2,7 @@ package pieces;
 
 import directionVectors.DirectionVector;
 import enums.Player;
+
 import java.util.Collection;
 
 /**

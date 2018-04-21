@@ -1,4 +1,3 @@
-import exceptions.BoardGameException;
 import ui.ChessFrame;
 
 /**

@@ -3,13 +3,13 @@ package bots;
 import enums.Player;
 import exceptions.BoardGameException;
 import exceptions.boardExceptions.InvalidPositionException;
-import exceptions.boardExceptions.KingNotFoundException;
 import exceptions.botExceptions.BotEvaluateException;
 import exceptions.botExceptions.BotMoveSearchException;
 import gameStates.BoardGameState;
 import gameStates.ChessState;
 import pieces.Piece;
 import pieces.chessPieces.*;
+
 import java.util.HashMap;
 import java.util.Map;
 

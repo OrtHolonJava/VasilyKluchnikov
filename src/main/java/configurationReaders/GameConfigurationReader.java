@@ -26,6 +26,9 @@ public class GameConfigurationReader
         loadConfig();
     }
 
+    /*
+        Updates the game configuration with new configuration parameters
+     */
     public static void updateGameConfig(String variantString, String isPlayerSideRandomString, String playerSideString, String isBotPlayingString, String botSearchDepthString)
     {
         OutputStream outputStream = null;
@@ -61,6 +64,9 @@ public class GameConfigurationReader
         }
     }
 
+    /*
+        Returns an instance of a chess game according to the variant played
+     */
     public static Chess getChessGame()
     {
         if(getVariantName().equals("standard"))
@@ -97,6 +103,10 @@ public class GameConfigurationReader
         return variantName;
     }
 
+
+    /*
+        Loads the configuration parameters
+     */
     private static void loadConfig()
     {
         InputStream inputStream = null;
@@ -130,6 +140,9 @@ public class GameConfigurationReader
         }
     }
 
+    /*
+        Interprets chess variant config parameter to the variant played
+     */
     private static void readChessVariantSetting(Properties properties) throws InvalidPropertiesFormatException
     {
         String chessVariant = properties.getProperty("chessVariant");
@@ -143,6 +156,9 @@ public class GameConfigurationReader
         }
     }
 
+    /*
+        Interprets the bot config parameters to the bot settings
+     */
     private static void readBotSettings(Properties properties) throws InvalidPropertiesFormatException
     {
         String isBotPlaying = properties.getProperty("isBotPlaying").toLowerCase();
@@ -170,6 +186,9 @@ public class GameConfigurationReader
         }
     }
 
+    /*
+        Interprets player side config parameters to the player side settings
+     */
     private static void readPlayerSideSettings(Properties properties) throws InvalidPropertiesFormatException
     {
         String isPlayerColorRandom = properties.getProperty("isPlayerSideRandom").toLowerCase();

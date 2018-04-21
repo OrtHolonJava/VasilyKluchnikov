@@ -16,8 +16,8 @@ import java.util.Collection;
  */
 public class MainMenuPanel extends JPanel
 {
+    public static final Color BACKGROUND_COLOR = new Color(122, 145, 182);
     private static final int NUMBER_OF_BUTTONS = 4;
-    private static final Color BACKGROUND_COLOR = new Color(122, 145, 182);
 
     private ChessFrame chessFrameContainer;
 
@@ -30,11 +30,17 @@ public class MainMenuPanel extends JPanel
         initializeButtons();
     }
 
+    /*
+       Updates the size of the panel based on current resolution setting
+    */
     public void updateSize()
     {
         setSize(SettingsConfigurationReader.getAppResolution());
     }
 
+    /*
+        Initializes the buttons UI
+     */
     private void initializeButtons()
     {
         Collection<MenuButton> menuButtons = new ArrayList<>();

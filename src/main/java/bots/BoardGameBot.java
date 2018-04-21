@@ -5,10 +5,9 @@ import exceptions.BoardGameException;
 import exceptions.botExceptions.BotEvaluateException;
 import exceptions.botExceptions.BotMoveSearchException;
 import gameStates.BoardGameState;
-import gameStates.ChessState;
 import pieces.Piece;
+
 import java.util.Collection;
-import java.util.List;
 
 /**
  * Created by divided on 19.03.2018.

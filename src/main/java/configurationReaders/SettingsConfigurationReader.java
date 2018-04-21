@@ -1,6 +1,7 @@
 package configurationReaders;
 
 import ui.ChessFrame;
+
 import java.awt.*;
 import java.io.*;
 import java.util.Properties;
@@ -19,6 +20,9 @@ public class SettingsConfigurationReader
         loadConfig();
     }
 
+    /*
+        Updates the game configuration with new configuration parameters
+     */
     public static void updateSettingsConfig(String frameWidthString, String frameHeightString, String lightR,
                                            String lightG, String lightB, String darkR, String darkG, String darkB)
     {
@@ -80,6 +84,9 @@ public class SettingsConfigurationReader
         return darkColor;
     }
 
+    /*
+        Loads the configuration parameters
+     */
     private static void loadConfig()
     {
         InputStream inputStream = null;

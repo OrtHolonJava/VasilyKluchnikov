@@ -41,7 +41,7 @@ public abstract class BoardGameBot
             {
                 evaluateScore *= -1;
             }
-
+            setLastBestMinimaxState(state);
             return evaluateScore;
         }
 

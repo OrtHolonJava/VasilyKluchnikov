@@ -18,7 +18,7 @@ public class SettingsPanel extends JPanel
     private static final Color BACKGROUND_COLOR = MainMenuPanel.BACKGROUND_COLOR;
     private static final Font TEXT_FONT = new Font("Tahoma", Font.BOLD, 24);
 
-    private static final String[] POSSIBLE_RESOLUTIONS = new String [] {"960x720", "1024x768", "1280x720", "1280x960", "1600x900", "1920x1080"};
+    private static final String[] POSSIBLE_RESOLUTIONS = new String [] {"1024x576", "1280x720", "1366x768", "1600x900", "1920x1080"};
 
     private static final double OPTIONS_PANEL_WIDTH_RATIO = 0.8;
     private static final double OPTIONS_PANEL_HEIGHT_RATIO = 0.8;

@@ -28,7 +28,6 @@ public class ChessFrame extends JFrame
         setSize(SettingsConfigurationReader.getAppResolution());
 
         openMainMenu();
-
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setResizable(false);
         setVisible(true);

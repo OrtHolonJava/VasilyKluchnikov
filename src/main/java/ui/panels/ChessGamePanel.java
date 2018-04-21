@@ -366,7 +366,6 @@ public class ChessGamePanel extends JPanel
                 updateBoardUI();
                 updateGameOnResult(getGameResult());
                 updateLastMoveHighlight(startMovePosition, clickedTilePosition);
-                updateAllPanels();
 
                 if(isBotPlaying() && getChessState().getPlayerToMove() == getBotPlayer())
                 {
@@ -389,23 +388,6 @@ public class ChessGamePanel extends JPanel
         Timer timer = new Timer(DELAY_FOR_BOARD_UPDATE_IN_MS, botMoveLaunch);
         timer.setRepeats(false);
         timer.start();
-    }
-
-    private void updateAllPanels()
-    {
-        revalidate();
-        repaint();
-        getBoardPanel().revalidate();
-        getBoardPanel().repaint();
-        for(int x = 0; x < getTiles().length; x++)
-        {
-            for (int y = 0; y < getTiles()[0].length; y++)
-            {
-                BoardTilePanel tile = getTiles()[x][y];
-                tile.revalidate();
-                tile.repaint();
-            }
-        }
     }
 
     /*

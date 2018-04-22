@@ -14,6 +14,11 @@ public abstract class BoardGameState<T extends Piece>
     protected T[][] board;
     private Player playerToMove;
 
+    /*
+       Returns all states that are possible after this state
+    */
+    public abstract Collection<BoardGameState<T>> getAllPossibleStates() throws BoardGameException;
+
     public BoardGameState(T[][] board, Player playerToMove)
     {
         this.board = board;
@@ -25,11 +30,6 @@ public abstract class BoardGameState<T extends Piece>
         this.playerToMove = state.playerToMove;
         cloneBoard(state);
     }
-
-    /*
-        Returns all states that are possible after this state
-     */
-    public abstract Collection<BoardGameState<T>> getAllPossibleStates() throws BoardGameException;
 
     public T[][] getBoard()
     {
@@ -46,6 +46,9 @@ public abstract class BoardGameState<T extends Piece>
         this.playerToMove = playerToMove;
     }
 
+    /*
+        Clones the given board to the current board of this state
+     */
     private void cloneBoard(BoardGameState<T> state)
     {
         board = state.getBoard().clone();

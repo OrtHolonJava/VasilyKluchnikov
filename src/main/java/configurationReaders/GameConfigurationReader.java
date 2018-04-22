@@ -31,11 +31,9 @@ public class GameConfigurationReader
      */
     public static void updateGameConfig(String variantString, String isPlayerSideRandomString, String playerSideString, String isBotPlayingString, String botSearchDepthString)
     {
-        OutputStream outputStream = null;
-        try
+        try (OutputStream outputStream = new FileOutputStream(ChessFrame.CONFIG_DIRECTORY_PATH + CONFIG_FILE_NAME))
         {
             Properties properties = new Properties();
-            outputStream = new FileOutputStream(ChessFrame.CONFIG_DIRECTORY_PATH + CONFIG_FILE_NAME);
             properties.setProperty("chessVariant", variantString);
             properties.setProperty("isPlayerSideRandom", isPlayerSideRandomString);
             properties.setProperty("playerSide", playerSideString);
@@ -50,18 +48,6 @@ public class GameConfigurationReader
             e.printStackTrace();
             System.out.println("Error while rewriting the game configuration");
         }
-        finally
-        {
-            try
-            {
-                outputStream.close();
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-                System.out.println("Failed to close the output stream");
-            }
-        }
     }
 
     /*
@@ -73,10 +59,9 @@ public class GameConfigurationReader
         {
             return new Chess();
         }
-        else
-        {
-            return null;
-        }
+
+        return null;
+
     }
 
     public static boolean isBotPlaying()
@@ -102,7 +87,6 @@ public class GameConfigurationReader
     {
         return variantName;
     }
-
 
     /*
         Loads the configuration parameters

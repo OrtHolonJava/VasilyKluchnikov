@@ -30,7 +30,7 @@ public class ChessFrame extends JFrame
 
         openMainMenu();
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        setResizable(true);
+        setResizable(false);
         setVisible(true);
     }
 

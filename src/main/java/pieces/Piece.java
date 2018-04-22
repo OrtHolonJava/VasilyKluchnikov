@@ -12,6 +12,8 @@ public abstract class Piece<T extends DirectionVector>
 {
     private Player player;
 
+    public abstract Collection<T> getDirectionVectors();
+
     public Piece(Player player)
     {
         this.player = player;
@@ -21,8 +23,6 @@ public abstract class Piece<T extends DirectionVector>
     {
         this.player = piece.player;
     }
-
-    public abstract Collection<T> getDirectionVectors();
 
     public Player getPlayer()
     {

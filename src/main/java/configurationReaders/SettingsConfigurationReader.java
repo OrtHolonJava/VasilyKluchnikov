@@ -26,11 +26,9 @@ public class SettingsConfigurationReader
     public static void updateSettingsConfig(String frameWidthString, String frameHeightString, String lightR,
                                            String lightG, String lightB, String darkR, String darkG, String darkB)
     {
-        OutputStream outputStream = null;
-        try
+        try (OutputStream outputStream = new FileOutputStream(ChessFrame.CONFIG_DIRECTORY_PATH + CONFIG_FILE_NAME))
         {
             Properties properties = new Properties();
-            outputStream = new FileOutputStream(ChessFrame.CONFIG_DIRECTORY_PATH + CONFIG_FILE_NAME);
             properties.setProperty("frameWidth", frameWidthString);
             properties.setProperty("frameHeight", frameHeightString);
 
@@ -47,20 +45,7 @@ public class SettingsConfigurationReader
         }
         catch (IOException e)
         {
-            e.printStackTrace();
             System.out.println("Error while rewriting the options configuration");
-        }
-        finally
-        {
-            try
-            {
-                outputStream.close();
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-                System.out.println("Failed to close the output stream");
-            }
         }
     }
 

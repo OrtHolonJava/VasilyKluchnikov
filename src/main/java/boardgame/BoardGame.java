@@ -15,6 +15,9 @@ public abstract class BoardGame<T extends BoardGameState>
     protected Collection<T> previousStates;
     protected int turnCount;
 
+    public abstract GameResult getGameResult() throws BoardGameException;
+    protected abstract T getStartingState();
+
     public BoardGame()
     {
         setCurrentState(getStartingState());
@@ -33,8 +36,6 @@ public abstract class BoardGame<T extends BoardGameState>
         setTurnCount(getTurnCount() + 1);
     }
 
-    public abstract GameResult getGameResult() throws BoardGameException;
-
     public T getCurrentState()
     {
         return currentState;
@@ -49,8 +50,6 @@ public abstract class BoardGame<T extends BoardGameState>
     {
         return turnCount;
     }
-
-    protected abstract T getStartingState();
 
     private void setCurrentState(T currentState)
     {

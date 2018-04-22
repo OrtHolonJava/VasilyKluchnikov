@@ -139,8 +139,9 @@ public class ChessGamePanel extends JPanel
             {
                 Player botPlayer = Player.getOppositePlayer(GameConfigurationReader.getPlayerSide());
                 setBotPlayer(botPlayer);
-                setBotDepth(GameConfigurationReader.getBotSearchDepth());
             }
+
+            setBotDepth(GameConfigurationReader.getBotSearchDepth());
         }
     }
 

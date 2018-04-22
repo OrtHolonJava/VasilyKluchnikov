@@ -36,8 +36,13 @@ public abstract class BoardGameBot
         Collection<BoardGameState> allPossibleStates = state.getAllPossibleStates();
         if(depth == 0 || allPossibleStates.isEmpty())
         {
-            double evaluateScore = evaluate(state);
             setLastBestMinimaxState(state);
+            double evaluateScore = evaluate(state);
+
+            if(state.getPlayerToMove() == Player.BLACK)
+            {
+                evaluateScore *= -1;
+            }
             return evaluateScore;
         }
 

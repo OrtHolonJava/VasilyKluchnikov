@@ -67,9 +67,9 @@ public class ChessBot extends BoardGameBot
         }
         catch (BoardGameException e)
         {
-            System.out.println("Error checking for mate or a draw");
-            return 0;
+            throw new BotEvaluateException("Error checking for mate or a draw");
         }
+
         double whiteScore = 0, blackScore = 0, pieceEvaluateScore;
         Piece piece;
         Piece[][] board = state.getBoard();

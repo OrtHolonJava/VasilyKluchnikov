@@ -41,28 +41,33 @@ public class ChessBoardUtils
                     player = Player.BLACK;
                 }
                 ch = Character.toUpperCase(ch);
-                switch(ch)
+                if(ch == 'P')
                 {
-                    case 'P':
-                        board[x][y] = new Pawn(player);
-                        break;
-                    case 'N':
-                        board[x][y] = new Knight(player);
-                        break;
-                    case 'B':
-                        board[x][y] = new Bishop(player);
-                        break;
-                    case 'R':
-                        board[x][y] = new Rook(player);
-                        break;
-                    case 'Q':
-                        board[x][y] = new Queen(player);
-                        break;
-                    case 'K':
-                        board[x][y] = new King(player);
-                        break;
-                    default:
-                        throw new IllegalArgumentException("Invalid FEN");
+                    board[x][y] = new Pawn(player);
+                }
+                else if(ch == 'N')
+                {
+                    board[x][y] = new Knight(player);
+                }
+                else if(ch == 'B')
+                {
+                    board[x][y] = new Bishop(player);
+                }
+                else if(ch == 'R')
+                {
+                    board[x][y] = new Rook(player);
+                }
+                else if(ch == 'Q')
+                {
+                    board[x][y] = new Queen(player);
+                }
+                else if(ch == 'K')
+                {
+                    board[x][y] = new King(player);
+                }
+                else
+                {
+                    throw new IllegalArgumentException("Invalid FEN");
                 }
 
                 y = (y + 1) % board.length;

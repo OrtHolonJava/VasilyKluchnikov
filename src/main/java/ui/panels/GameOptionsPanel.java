@@ -195,18 +195,14 @@ public class GameOptionsPanel extends JPanel
         variantPanel.setBackground(BACKGROUND_COLOR);
 
         JLabel variantText = new JLabel("Variant");
-        String standardVariant = "Standard", chess960Variant = "Chess960";
-        String[] variantChoices = {standardVariant, chess960Variant};
+        String standardVariant = "Standard";
+        String[] variantChoices = {standardVariant};
         JComboBox<String> variantOptionBox = new JComboBox<String>(variantChoices);
         setVariantBox(variantOptionBox);
 
         if(GameConfigurationReader.getVariantName().equals(standardVariant.toLowerCase()))
         {
             variantOptionBox.setSelectedItem(standardVariant);
-        }
-        else
-        {
-            variantOptionBox.setSelectedItem(chess960Variant);
         }
 
         variantText.setBackground(BACKGROUND_COLOR);

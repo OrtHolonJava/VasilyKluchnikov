@@ -89,11 +89,9 @@ public class SettingsConfigurationReader
      */
     private static void loadConfig()
     {
-        InputStream inputStream = null;
-        try
+        try (InputStream inputStream = new FileInputStream(ChessFrame.CONFIG_DIRECTORY_PATH + CONFIG_FILE_NAME))
         {
             Properties properties = new Properties();
-            inputStream = new FileInputStream(ChessFrame.CONFIG_DIRECTORY_PATH + CONFIG_FILE_NAME);
             properties.load(inputStream);
 
             int width = Integer.parseInt(properties.getProperty("frameWidth"));
@@ -114,18 +112,6 @@ public class SettingsConfigurationReader
         {
             e.printStackTrace();
             System.out.println("Error while loading the options configurationReaders");
-        }
-        finally
-        {
-            try
-            {
-                inputStream.close();
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-                System.out.println("Failed to close the input stream");
-            }
         }
     }
 

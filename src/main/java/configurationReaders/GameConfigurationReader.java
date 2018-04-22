@@ -109,11 +109,9 @@ public class GameConfigurationReader
      */
     private static void loadConfig()
     {
-        InputStream inputStream = null;
-        try
+        try (InputStream inputStream = new FileInputStream(ChessFrame.CONFIG_DIRECTORY_PATH + CONFIG_FILE_NAME))
         {
             Properties properties = new Properties();
-            inputStream = new FileInputStream(ChessFrame.CONFIG_DIRECTORY_PATH + CONFIG_FILE_NAME);
             properties.load(inputStream);
 
             readChessVariantSetting(properties);
@@ -126,18 +124,6 @@ public class GameConfigurationReader
             e.printStackTrace();
             System.out.println("Error while loading the options configuration");
         }
-        finally
-        {
-            try
-            {
-                inputStream.close();
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-                System.out.println("Failed to close the input stream");
-            }
-        }
     }
 
     /*
@@ -146,7 +132,7 @@ public class GameConfigurationReader
     private static void readChessVariantSetting(Properties properties) throws InvalidPropertiesFormatException
     {
         String chessVariant = properties.getProperty("chessVariant");
-        if(chessVariant.equals("standard") || chessVariant.equals("chess960"))
+        if(chessVariant.equals("standard"))
         {
             setVariantName(chessVariant);
         }

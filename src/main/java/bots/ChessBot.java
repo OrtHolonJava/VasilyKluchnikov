@@ -18,6 +18,7 @@ import java.util.Map;
  */
 public class ChessBot extends BoardGameBot
 {
+    private static final double CHECKMATE_EVALUATE_SCORE = 10000;
     private static final double PAWN_EVALUATE_SCORE = 1;
     private static final double KNIGHT_EVALUATE_SCORE = 3.2;
     private static final double BISHOP_EVALUATE_SCORE = 3.3;
@@ -46,6 +47,29 @@ public class ChessBot extends BoardGameBot
     @Override
     public double evaluate(BoardGameState<Piece> state) throws BotEvaluateException
     {
+        try
+        {
+            if (state.getAllPossibleStates().isEmpty())
+            {
+                double evaluateScore = 0;
+                if (((ChessState) state).kingIsUnderCheck(state.getPlayerToMove()))
+                {
+                    evaluateScore = CHECKMATE_EVALUATE_SCORE;
+                }
+
+                if(Player.getOppositePlayer(state.getPlayerToMove()) == Player.BLACK)
+                {
+                    evaluateScore *= -1;
+                }
+
+                return evaluateScore;
+            }
+        }
+        catch (BoardGameException e)
+        {
+            System.out.println("Error checking for mate or a draw");
+            return 0;
+        }
         double whiteScore = 0, blackScore = 0, pieceEvaluateScore;
         Piece piece;
         Piece[][] board = state.getBoard();

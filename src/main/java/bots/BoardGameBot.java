@@ -34,13 +34,9 @@ public abstract class BoardGameBot
     public double minimax(BoardGameState state, int depth, double alpha, double beta) throws BoardGameException
     {
         Collection<BoardGameState> allPossibleStates = state.getAllPossibleStates();
-        if(depth == 0 || state.getAllPossibleStates().isEmpty())
+        if(depth == 0 || allPossibleStates.isEmpty())
         {
             double evaluateScore = evaluate(state);
-            if(state.getPlayerToMove() == Player.BLACK)
-            {
-                evaluateScore *= -1;
-            }
             setLastBestMinimaxState(state);
             return evaluateScore;
         }

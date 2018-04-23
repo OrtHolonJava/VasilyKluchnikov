@@ -1,7 +1,7 @@
 package boardgame;
 
 /**
- * Created by divided on 24.03.2018.
+ * Position on a board (x,y)
  */
 public class BoardPosition
 {

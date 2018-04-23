@@ -6,7 +6,7 @@ import gameStates.ChessState;
 import pieces.chessPieces.*;
 
 /**
- * Created by divided on 22.03.2018.
+ * Contains static functions related to the chess board
  */
 public class ChessBoardUtils
 {

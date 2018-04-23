@@ -7,7 +7,8 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
- * Created by divided on 17.04.2018.
+ * Panel which represents a single board tile
+ * Holds a jlabel which can contain an image, and its position on the board
  */
 public class BoardTilePanel extends JPanel
 {

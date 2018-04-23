@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 /**
- * Created by divided on 19.04.2018.
+ * The main menu panel
  */
 public class MainMenuPanel extends JPanel
 {

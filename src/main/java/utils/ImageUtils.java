@@ -4,7 +4,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 
 /**
- * Created by divided on 21.04.2018.
+ * Contains static functions related to images
  */
 public class ImageUtils
 {

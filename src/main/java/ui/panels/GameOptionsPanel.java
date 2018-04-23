@@ -12,7 +12,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 /**
- * Created by divided on 20.04.2018.
+ * The game options panel
  */
 public class GameOptionsPanel extends JPanel
 {

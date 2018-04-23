@@ -30,7 +30,7 @@ import java.io.IOException;
 import java.util.Collection;
 
 /**
- * Created by divided on 13.04.2018.
+ * The panel with the chess game GUI/screen
  */
 public class ChessGamePanel extends JPanel
 {

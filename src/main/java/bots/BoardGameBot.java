@@ -10,7 +10,7 @@ import pieces.Piece;
 import java.util.Collection;
 
 /**
- * Created by divided on 19.03.2018.
+ * Generic bot, which finds the best state for a given one
  */
 public abstract class BoardGameBot
 {

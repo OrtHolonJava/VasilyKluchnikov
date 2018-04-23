@@ -7,7 +7,7 @@ import java.io.*;
 import java.util.Properties;
 
 /**
- * Created by divided on 19.04.2018.
+ * Reads from the settings configuration
  */
 public class SettingsConfigurationReader
 {

@@ -1,7 +1,7 @@
 package gameStates;
 
 /**
- * Created by divided on 14.04.2018.
+ * A class which contains move statuses of specific chess pieces (whether they have moved)
  */
 public class ChessPieceMoveStatus
 {

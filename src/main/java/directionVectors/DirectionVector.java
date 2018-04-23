@@ -3,7 +3,7 @@ package directionVectors;
 import java.util.Collection;
 
 /**
- * Created by divided on 19.03.2018.
+ * A direction vector, which holds a collection of integers which represent a direction
  */
 public class DirectionVector
 {

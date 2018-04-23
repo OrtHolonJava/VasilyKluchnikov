@@ -11,7 +11,7 @@ import java.awt.*;
 import java.awt.event.WindowEvent;
 
 /**
- * Created by divided on 17.04.2018.
+ * The main frame of the whole application, which manages all of the GUI, and opens the different screens/menus
  */
 public class ChessFrame extends JFrame
 {

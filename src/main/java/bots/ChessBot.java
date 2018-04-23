@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created by divided on 19.03.2018.
+ * A chess bot, which evaluates chess positions and finds the best one
  */
 public class ChessBot extends BoardGameBot
 {

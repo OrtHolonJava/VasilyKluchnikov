@@ -11,7 +11,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 /**
- * Created by divided on 20.04.2018.
+ * The settings panel
  */
 public class SettingsPanel extends JPanel
 {

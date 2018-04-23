@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 /**
- * Created by divided on 19.03.2018.
+ * A chess direction vector
+ * Each vector consists of up and right movement (can be negative), and whether the movement can repeat
  */
 public class ChessDirectionVector extends DirectionVector
 {

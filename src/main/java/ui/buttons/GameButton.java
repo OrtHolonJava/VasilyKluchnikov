@@ -4,7 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
- * Created by divided on 19.04.2018.
+ * The button which is used inside of the game panel
  */
 public class GameButton extends JButton
 {

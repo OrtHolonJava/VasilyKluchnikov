@@ -7,7 +7,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 /**
- * Created by divided on 19.03.2018.
+ * Generic Board Game abstract class
+ * @param <T> The state of the board game
  */
 public abstract class BoardGame<T extends BoardGameState>
 {

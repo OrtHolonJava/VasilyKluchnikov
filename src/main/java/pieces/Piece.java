@@ -6,7 +6,8 @@ import enums.Player;
 import java.util.Collection;
 
 /**
- * Created by divided on 19.03.2018.
+ * A generic piece class, each piece contains its own direction vectors
+ * @param <T> The default direction vector
  */
 public abstract class Piece<T extends DirectionVector>
 {

@@ -4,7 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
- * Created by divided on 19.04.2018.
+ * The button which is used in the menu's of the application
  */
 public class MenuButton extends JButton
 {

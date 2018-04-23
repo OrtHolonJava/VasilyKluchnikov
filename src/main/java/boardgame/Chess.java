@@ -9,7 +9,8 @@ import utils.ChessBoardUtils;
 import java.util.Collection;
 
 /**
- * Created by divided on 19.03.2018.
+ * A chess game class
+ * @param <T> The state of the chess game
  */
 public class Chess<T extends ChessState> extends BoardGame
 {

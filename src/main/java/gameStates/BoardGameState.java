@@ -7,7 +7,8 @@ import pieces.Piece;
 import java.util.Collection;
 
 /**
- * Created by divided on 19.03.2018.
+ * A generic board game state, containing the board of the game and the player to move
+ * @param <T> A generic piece object
  */
 public abstract class BoardGameState<T extends Piece>
 {

@@ -13,7 +13,9 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * Created by divided on 19.03.2018.
+ * A chess state, can generate all next possible chess states
+ * Holds all of the internal chess rule logic
+ * @param <T>
  */
 public class ChessState<T extends ChessPiece> extends BoardGameState<T>
 {

@@ -3,7 +3,7 @@ package enums;
 import java.util.Random;
 
 /**
- * Created by divided on 19.03.2018.
+ * Enum which represents a player
  */
 public enum Player
 {

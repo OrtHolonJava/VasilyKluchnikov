@@ -3,7 +3,7 @@ package boardgame;
 import enums.Player;
 
 /**
- * Created by divided on 16.04.2018.
+ * Game result, contains whether the game is finished, and the winner of it
  */
 public class GameResult
 {

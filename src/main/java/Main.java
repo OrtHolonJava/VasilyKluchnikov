@@ -1,7 +1,7 @@
 import ui.ChessFrame;
 
 /**
- * Created by divided on 15.11.2017.
+ * The main class, from which the app starts running
  */
 public class Main
 {

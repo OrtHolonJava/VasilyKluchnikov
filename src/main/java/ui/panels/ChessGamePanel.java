@@ -99,6 +99,8 @@ public class ChessGamePanel extends JPanel
      */
     public void startRematch()
     {
+        setLightTileColor(SettingsConfigurationReader.getLightTileColor());
+        setDarkTileColor(SettingsConfigurationReader.getDarkTileColor());
         initializeGameSettings();
         startGame();
         setAllTilesToDefaultColor();
@@ -381,6 +383,7 @@ public class ChessGamePanel extends JPanel
      */
     private void waitThenMakeBotMove()
     {
+        setListeningToUser(false);
         ActionListener botMoveLaunch = new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
                 makeBotMove();
@@ -396,8 +399,6 @@ public class ChessGamePanel extends JPanel
      */
     private void makeBotMove()
     {
-        setListeningToUser(false);
-
         ChessState currentState = getChessState(), newState = null;
         try
         {
@@ -566,7 +567,7 @@ public class ChessGamePanel extends JPanel
      */
     private Color getDefaultTileColorByPosition(BoardPosition tilePosition)
     {
-        if((tilePosition.getX() + tilePosition.getY() + 1) % 2 == 0)
+        if((tilePosition.getX() + tilePosition.getY()) % 2 == 0)
         {
             return getLightTileColor();
         }

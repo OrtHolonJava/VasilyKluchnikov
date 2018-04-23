@@ -100,7 +100,6 @@ public class SettingsPanel extends JPanel
             {
                 if(hasUserChangedSettings() && userWantsToApplySettings())
                 {
-                    System.out.println("HOI");
                     updateSettingsConfig();
                     getChessFrameContainer().updateResolution();
                 }
@@ -159,8 +158,8 @@ public class SettingsPanel extends JPanel
         String frameWidth = String.valueOf((int)(resolution.getWidth()));
         String frameHeight = String.valueOf((int)(resolution.getHeight()));
         String lightR = String.valueOf(getLightColorButton().getBackground().getRed());
-        String lightG = String.valueOf(getLightColorButton().getBackground().getBlue());
-        String lightB = String.valueOf(getLightColorButton().getBackground().getGreen());
+        String lightG = String.valueOf(getLightColorButton().getBackground().getGreen());
+        String lightB = String.valueOf(getLightColorButton().getBackground().getBlue());
         String darkR = String.valueOf(getDarkColorButton().getBackground().getRed());
         String darkG = String.valueOf(getDarkColorButton().getBackground().getGreen());
         String darkB = String.valueOf(getDarkColorButton().getBackground().getBlue());

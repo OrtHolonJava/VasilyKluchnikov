@@ -6,8 +6,8 @@ import enums.Player;
 import exceptions.BoardGameException;
 import exceptions.boardExceptions.InvalidPositionException;
 import exceptions.boardExceptions.KingNotFoundException;
+import pieces.Piece;
 import pieces.chessPieces.*;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -15,7 +15,7 @@ import java.util.List;
 /**
  * A chess state, can generate all next possible chess states
  * Holds all of the internal chess rule logic
- * @param <T>
+ * @param <T> A generic ChessPiece
  */
 public class ChessState<T extends ChessPiece> extends BoardGameState<T>
 {
@@ -54,25 +54,27 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
     @Override
     public Collection<BoardGameState<T>> getAllPossibleStates() throws BoardGameException
     {
+        Collection<BoardGameState<T>> possibleStates;
         Collection<BoardGameState<T>> possibleStatesWithoutCapture = new ArrayList<BoardGameState<T>>();
-        Collection<BoardGameState<T>> possibleStates = new ArrayList<>();
+        Collection<BoardGameState<T>> possibleStatesWithCapture = new ArrayList<BoardGameState<T>>();
+
         for(int x = 0; x < getBoard().length; x++)
         {
             for(int y = 0; y < getBoard()[0].length; y++)
             {
                 T piece = getBoard()[x][y];
-                if (piece != null && piece.getPlayer() == getPlayerToMove())
+                if (isPieceThatCanMove(piece))
                 {
                     BoardPosition piecePosition = new BoardPosition(x, y);
                     Collection<BoardPosition> possiblePositions = getPossiblePositionsForPiece(piecePosition);
                     for(BoardPosition possiblePosition : possiblePositions)
                     {
                         ChessState<T> newState = getStateAfterMove(piecePosition, possiblePosition);
-                        if(isMoveLegal(newState, piecePosition, possiblePosition))
+                        if(isMoveLegal(newState, piecePosition, possiblePosition)) // If the move is valid, add it to the appropriate list
                         {
                             if(getPieceByPosition(possiblePosition) != null)
                             {
-                                possibleStates.add(newState);
+                                possibleStatesWithCapture.add(newState);
                             }
                             else
                             {
@@ -83,68 +85,18 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
                 }
             }
         }
+
+        // In order for the minimax alpha-beta algorithm to work faster (on average), the first returned states, are states where a capture move happened
+        possibleStates = possibleStatesWithCapture;
         possibleStates.addAll(possibleStatesWithoutCapture);
         return possibleStates;
-    }
-
-    /*
-        Returns if the move is legal (with the check and castling rules), for the move and the state after the move
-     */
-    public boolean isMoveLegal(ChessState<T> newState, BoardPosition currentPosition, BoardPosition newPosition) throws BoardGameException
-    {
-        if(isCastlingMove(currentPosition, newPosition))
-        {
-            if(!isValidCastle(currentPosition, newPosition))
-            {
-                return false;
-            }
-        }
-        else
-        {
-            if(newState.kingIsUnderCheck(getPlayerToMove()))
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /*
-        Returns all possible board positions for a single piece (including positions that cause checks)
-     */
-    public Collection<BoardPosition> getPossiblePositionsForPiece(BoardPosition piecePosition) throws InvalidPositionException
-    {
-        if(!isValidPiecePosition(piecePosition))
-        {
-            throw new InvalidPositionException("Invalid position for the piece");
-        }
-
-        T piece = getPieceByPosition(piecePosition);
-        if (piece instanceof Pawn)
-        {
-            return getPossiblePositionsForPawn(piecePosition);
-        }
-
-        Collection<BoardPosition> possiblePositions = new ArrayList<BoardPosition>();
-        for (ChessDirectionVector directionVector : (Collection<ChessDirectionVector>)piece.getDirectionVectors())
-        {
-            possiblePositions.addAll(getPossiblePositionsForDirection(directionVector, piecePosition));
-        }
-
-        if(piece instanceof King)
-        {
-            possiblePositions.addAll(getCastlingPositions(piecePosition));
-        }
-        
-        return possiblePositions;
     }
 
     public Collection<BoardPosition> getAllValidPositionsForPiece(BoardPosition piecePosition) throws BoardGameException
     {
         Collection<BoardPosition> possiblePositionsForPiece = new ArrayList<>();
         ChessPiece piece = getBoard()[piecePosition.getX()][piecePosition.getY()];
-        if(piece != null && piece.getPlayer() == getPlayerToMove())
+        if(isPieceThatCanMove(piece))
         {
             Collection<BoardPosition> uncheckedPositionsForPiece = getPossiblePositionsForPiece(piecePosition);
             for(BoardPosition uncheckedPosition : uncheckedPositionsForPiece)
@@ -227,7 +179,7 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
     /*
         Sets the starting positions for the rook
      */
-    protected static void setRookStartPositions()
+    protected void setRookStartPositions()
     {
         whiteQueenSideRookStartPosition = new BoardPosition(WHITE_ROOK_START_X_POS, QUEEN_SIDE_ROOK_START_Y_POS);
         whiteKingSideRookStartPosition = new BoardPosition(WHITE_ROOK_START_X_POS, KING_SIDE_ROOK_START_Y_POS);
@@ -346,6 +298,59 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
             newState.setPositionOfDoubleMovedPawnLastTurn(null);
         }
         return newState;
+    }
+
+    /*
+        Returns if the move is legal (with the check and castling rules), for the move and the state after the move
+     */
+    private boolean isMoveLegal(ChessState<T> newState, BoardPosition currentPosition, BoardPosition newPosition) throws BoardGameException
+    {
+        if(isCastlingMove(currentPosition, newPosition))
+        {
+            if(!isValidCastle(currentPosition, newPosition))
+            {
+                return false;
+            }
+        }
+        else
+        {
+            if(newState.kingIsUnderCheck(getPlayerToMove()))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /*
+        Returns all possible board positions for a single piece (including positions that cause checks)
+     */
+    private Collection<BoardPosition> getPossiblePositionsForPiece(BoardPosition piecePosition) throws InvalidPositionException
+    {
+        if(!isValidPiecePosition(piecePosition))
+        {
+            throw new InvalidPositionException("Invalid position for the piece");
+        }
+
+        T piece = getPieceByPosition(piecePosition);
+        if (piece instanceof Pawn)
+        {
+            return getPossiblePositionsForPawn(piecePosition);
+        }
+
+        Collection<BoardPosition> possiblePositions = new ArrayList<BoardPosition>();
+        for (ChessDirectionVector directionVector : (Collection<ChessDirectionVector>)piece.getDirectionVectors())
+        {
+            possiblePositions.addAll(getPossiblePositionsForDirection(directionVector, piecePosition));
+        }
+
+        if(piece instanceof King)
+        {
+            possiblePositions.addAll(getCastlingPositions(piecePosition));
+        }
+
+        return possiblePositions;
     }
 
     /*
@@ -790,6 +795,14 @@ public class ChessState<T extends ChessPiece> extends BoardGameState<T>
     {
         return isPositionOnBoard(x,y) &&
                 (getBoard()[x][y] == null || getBoard()[x][y].getPlayer() != movingPlayer);
+    }
+
+    /*
+        Checks whether the given piece is a piece that can move this turn
+     */
+    private boolean isPieceThatCanMove(Piece piece)
+    {
+        return piece != null && piece.getPlayer() == getPlayerToMove();
     }
 
     /*
